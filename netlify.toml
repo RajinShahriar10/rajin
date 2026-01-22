@@ -1,5 +1,5 @@
 [build]
-  publish = "d:/WDD-2204/rajin's portfolio"
+  publish = "."
   command = "echo 'No build command needed for static site'"
 
 [build.environment]
