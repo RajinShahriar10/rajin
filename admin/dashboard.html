@@ -407,6 +407,48 @@
             margin-bottom: 1rem;
         }
         
+        .info-input-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+        
+        .info-input-group select {
+            min-width: 150px;
+            padding: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+        }
+        
+        .info-input-group input {
+            flex: 1;
+            padding: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+        }
+        
+        .btn-remove-info {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-remove-info:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+        
         .form-actions {
             display: flex;
             gap: 1rem;
@@ -533,6 +575,9 @@
         <button class="tab-btn" onclick="showTab('skills')">
             <i class="fas fa-cogs"></i> Skills
         </button>
+        <button class="tab-btn" onclick="showTab('about')">
+            <i class="fas fa-user"></i> About Me
+        </button>
         <button class="tab-btn" onclick="showTab('settings')">
             <i class="fas fa-sliders-h"></i> Settings
         </button>
@@ -563,6 +608,84 @@
         <div id="skills-grid" class="projects-grid">
             <!-- Skills will be loaded here -->
             <div class="loading">Loading skills...</div>
+        </div>
+    </div>
+
+    <!-- About Me Tab -->
+    <div id="about-tab" class="tab-content">
+        <div class="section-header">
+            <h2>👤 Manage About Me Section</h2>
+            <button class="btn-add" onclick="saveAboutData()">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+        </div>
+        <div class="project-card">
+            <form id="aboutForm">
+                <div class="form-group">
+                    <label for="aboutName">Full Name</label>
+                    <input type="text" id="aboutName" name="aboutName" value="MD. RAJIN SHAHRIAR" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="aboutTagline">Professional Tagline</label>
+                    <input type="text" id="aboutTagline" name="aboutTagline" value="Passionate Web Developer & Tech Entrepreneur" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="aboutImage">Profile Image</label>
+                    <div class="image-upload-area" id="aboutImageUploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-info">
+                            <strong>Click to upload or drag and drop</strong><br>
+                            <small>PNG, JPG, GIF up to 5MB</small>
+                        </div>
+                        <input type="file" id="aboutImageFile" accept="image/*" style="display: none;">
+                        <input type="hidden" id="aboutImageData" name="aboutImageData">
+                    </div>
+                    <div class="image-preview" id="aboutImagePreview">
+                        <img id="aboutPreviewImg" src="" alt="Profile Preview">
+                    </div>
+                    <input type="url" id="aboutImage" name="aboutImage" placeholder="Or enter image URL directly" style="margin-top: 1rem;">
+                </div>
+                
+                <div class="form-group">
+                    <label>Professional Details</label>
+                    <div id="aboutInfoInputs">
+                        <div class="info-input-group">
+                            <select class="info-icon">
+                                <option value="fa-graduation-cap">🎓 Education</option>
+                                <option value="fa-certificate">📜 Certificate</option>
+                                <option value="fa-briefcase">💼 Professional</option>
+                                <option value="fa-code">💻 Expertise</option>
+                                <option value="fa-map-marker-alt">📍 Location</option>
+                                <option value="fa-envelope">📧 Email</option>
+                                <option value="fa-phone">📞 Phone</option>
+                            </select>
+                            <input type="text" class="info-title" placeholder="Title (e.g., Education)">
+                            <input type="text" class="info-content" placeholder="Details (e.g., BSc in Computer Science)">
+                            <button type="button" class="btn-remove-info" onclick="this.parentElement.remove()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-add-tech" onclick="addAboutInfoInput()">
+                        <i class="fas fa-plus"></i> Add Info Item
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="aboutDescription">About Description</label>
+                    <textarea id="aboutDescription" name="aboutDescription" rows="5" placeholder="Brief description about yourself">Building modern, responsive, and user-friendly web experiences with cutting-edge technologies</textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-save" onclick="saveAboutData()">
+                        <i class="fas fa-save"></i> Save About Section
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -751,6 +874,7 @@
                 renderProjects();
                 renderSkills();
                 loadSettings();
+                loadAboutData();
             } catch (error) {
                 console.error('Failed to initialize DataManager:', error);
                 // Fallback to localStorage
@@ -1096,6 +1220,179 @@
             };
             
             await saveData('settings', settings);
+        }
+
+        // About Me Functions
+        function loadAboutData() {
+            const aboutData = JSON.parse(localStorage.getItem('portfolioAbout')) || {
+                name: "MD. RAJIN SHAHRIAR",
+                tagline: "Passionate Web Developer & Tech Entrepreneur",
+                image: "https://via.placeholder.com/400x500/667eea/ffffff?text=MD.+RAJIN+SHAHRIAR",
+                description: "Building modern, responsive, and user-friendly web experiences with cutting-edge technologies",
+                info: [
+                    { icon: "fa-graduation-cap", title: "Education", content: "BSc in Computer Science & Engineering" },
+                    { icon: "fa-certificate", title: "Certificate", content: "Professional Web Design & Development Certificate from UY LAB" },
+                    { icon: "fa-briefcase", title: "Professional", content: "Founder & CEO at Devlify App" },
+                    { icon: "fa-code", title: "Expertise", content: "Full-Stack Development | Modern Web Technologies" }
+                ]
+            };
+            
+            // Load form values
+            document.getElementById('aboutName').value = aboutData.name || '';
+            document.getElementById('aboutTagline').value = aboutData.tagline || '';
+            document.getElementById('aboutImage').value = aboutData.image && !aboutData.image.startsWith('data:') ? aboutData.image : '';
+            document.getElementById('aboutDescription').value = aboutData.description || '';
+            
+            // Load info items
+            const aboutInfoInputs = document.getElementById('aboutInfoInputs');
+            aboutInfoInputs.innerHTML = '';
+            if (aboutData.info && aboutData.info.length > 0) {
+                aboutData.info.forEach(item => {
+                    const infoGroup = createAboutInfoInput(item);
+                    aboutInfoInputs.appendChild(infoGroup);
+                });
+            }
+            
+            // Show existing image preview
+            if (aboutData.image) {
+                const previewImg = document.getElementById('aboutPreviewImg');
+                const imagePreview = document.getElementById('aboutImagePreview');
+                previewImg.src = aboutData.image;
+                imagePreview.style.display = 'block';
+                if (aboutData.image.startsWith('data:')) {
+                    document.getElementById('aboutImageData').value = aboutData.image;
+                }
+            }
+            
+            // Initialize image upload
+            setTimeout(() => {
+                initializeAboutImageUpload();
+            }, 100);
+        }
+
+        function createAboutInfoInput(data = {}) {
+            const infoGroup = document.createElement('div');
+            infoGroup.className = 'info-input-group';
+            infoGroup.innerHTML = `
+                <select class="info-icon">
+                    <option value="fa-graduation-cap" ${data.icon === 'fa-graduation-cap' ? 'selected' : ''}>🎓 Education</option>
+                    <option value="fa-certificate" ${data.icon === 'fa-certificate' ? 'selected' : ''}>📜 Certificate</option>
+                    <option value="fa-briefcase" ${data.icon === 'fa-briefcase' ? 'selected' : ''}>💼 Professional</option>
+                    <option value="fa-code" ${data.icon === 'fa-code' ? 'selected' : ''}>💻 Expertise</option>
+                    <option value="fa-map-marker-alt" ${data.icon === 'fa-map-marker-alt' ? 'selected' : ''}>📍 Location</option>
+                    <option value="fa-envelope" ${data.icon === 'fa-envelope' ? 'selected' : ''}>📧 Email</option>
+                    <option value="fa-phone" ${data.icon === 'fa-phone' ? 'selected' : ''}>📞 Phone</option>
+                </select>
+                <input type="text" class="info-title" placeholder="Title (e.g., Education)" value="${data.title || ''}">
+                <input type="text" class="info-content" placeholder="Details (e.g., BSc in Computer Science)" value="${data.content || ''}">
+                <button type="button" class="btn-remove-info" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            return infoGroup;
+        }
+
+        function addAboutInfoInput() {
+            const aboutInfoInputs = document.getElementById('aboutInfoInputs');
+            const newInfoGroup = createAboutInfoInput();
+            aboutInfoInputs.appendChild(newInfoGroup);
+        }
+
+        function initializeAboutImageUpload() {
+            const uploadArea = document.getElementById('aboutImageUploadArea');
+            const fileInput = document.getElementById('aboutImageFile');
+            const imagePreview = document.getElementById('aboutImagePreview');
+            const previewImg = document.getElementById('aboutPreviewImg');
+            const imageDataInput = document.getElementById('aboutImageData');
+            const imageUrlInput = document.getElementById('aboutImage');
+
+            // Click to upload
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File selection
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    handleAboutImageFile(file);
+                }
+            });
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type.startsWith('image/')) {
+                        handleAboutImageFile(file);
+                    } else {
+                        showMessage('Please upload an image file (PNG, JPG, GIF)', 'error');
+                    }
+                }
+            });
+
+            function handleAboutImageFile(file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    showMessage('File size must be less than 5MB', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageData = e.target.result;
+                    previewImg.src = imageData;
+                    imagePreview.style.display = 'block';
+                    imageDataInput.value = imageData;
+                    imageUrlInput.value = '';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Handle URL input changes
+            imageUrlInput.addEventListener('input', (e) => {
+                const url = e.target.value;
+                if (url) {
+                    previewImg.src = url;
+                    imagePreview.style.display = 'block';
+                    imageDataInput.value = '';
+                    fileInput.value = '';
+                } else {
+                    imagePreview.style.display = 'none';
+                }
+            });
+        }
+
+        async function saveAboutData() {
+            const infoGroups = document.querySelectorAll('#aboutInfoInputs .info-input-group');
+            const infoArray = Array.from(infoGroups).map(group => ({
+                icon: group.querySelector('.info-icon').value,
+                title: group.querySelector('.info-title').value,
+                content: group.querySelector('.info-content').value
+            })).filter(item => item.title && item.content);
+
+            const aboutData = {
+                name: document.getElementById('aboutName').value,
+                tagline: document.getElementById('aboutTagline').value,
+                image: document.getElementById('aboutImageData').value || document.getElementById('aboutImage').value || 'https://via.placeholder.com/400x500/667eea/ffffff?text=MD.+RAJIN+SHAHRIAR',
+                description: document.getElementById('aboutDescription').value,
+                info: infoArray
+            };
+
+            await saveData('about', aboutData);
+            showMessage('About section saved successfully! Changes will appear on the website after refresh.', 'success');
         }
 
         async function saveData(dataType, data) {
