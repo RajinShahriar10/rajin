@@ -1037,14 +1037,162 @@
 
         async function loadData() {
             try {
-                projects = await dataManager.loadData('projects');
-                skills = await dataManager.loadData('skills');
-                settings = await dataManager.loadData('settings');
-                console.log('✅ Data loaded from DataManager');
+                // Load data using the same priority as website
+                await loadAdminProjects();
+                await loadAdminSkills();
+                await loadAdminSettings();
+                await loadAdminAbout();
+                
+                console.log('✅ Admin data loaded consistently with website');
             } catch (error) {
-                console.error('❌ Failed to load data from DataManager:', error);
-                throw error;
+                console.error('❌ Failed to load admin data:', error);
+                // Fallback to localStorage
+                initLocalStorage();
             }
+        }
+
+        async function loadAdminProjects() {
+            // Try admin localStorage first (same as website)
+            const adminProjects = localStorage.getItem('portfolioProjects');
+            if (adminProjects) {
+                projects = JSON.parse(adminProjects);
+                console.log('📦 Admin: Loaded projects from localStorage:', projects.length);
+                return;
+            }
+
+            // Try JSON file (same as website)
+            try {
+                const response = await fetch('content/projects/projects.json');
+                if (response.ok) {
+                    projects = await response.json();
+                    console.log('📁 Admin: Loaded projects from JSON:', projects.length);
+                    // Save to localStorage for consistency
+                    localStorage.setItem('portfolioProjects', JSON.stringify(projects));
+                    return;
+                }
+            } catch (error) {
+                console.log('⚠️ Admin: Could not load JSON file');
+            }
+
+            // Fallback to sample data
+            projects = [
+                {
+                    id: 1,
+                    title: "E-Commerce Platform",
+                    description: "A modern e-commerce platform built with React and Node.js",
+                    image: "https://via.placeholder.com/400x200/667eea/ffffff?text=E-Commerce",
+                    technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+                    liveUrl: "https://example-ecommerce.com",
+                    githubUrl: "https://github.com/example/ecommerce"
+                }
+            ];
+            console.log('🔧 Admin: Using sample projects');
+        }
+
+        async function loadAdminSkills() {
+            // Try admin localStorage first
+            const adminSkills = localStorage.getItem('portfolioSkills');
+            if (adminSkills) {
+                skills = JSON.parse(adminSkills);
+                console.log('📦 Admin: Loaded skills from localStorage:', skills.length);
+                return;
+            }
+
+            // Try JSON file
+            try {
+                const response = await fetch('content/skills/skills.json');
+                if (response.ok) {
+                    skills = await response.json();
+                    console.log('📁 Admin: Loaded skills from JSON:', skills.length);
+                    localStorage.setItem('portfolioSkills', JSON.stringify(skills));
+                    return;
+                }
+            } catch (error) {
+                console.log('⚠️ Admin: Could not load skills JSON');
+            }
+
+            // Fallback
+            skills = [
+                {
+                    id: 1,
+                    name: "JavaScript",
+                    icon: "fab fa-js",
+                    level: 88,
+                    color: "#F7DF1E",
+                    category: "Frontend"
+                }
+            ];
+            console.log('🔧 Admin: Using sample skills');
+        }
+
+        async function loadAdminSettings() {
+            // Try admin localStorage first
+            const adminSettings = localStorage.getItem('portfolioSettings');
+            if (adminSettings) {
+                settings = JSON.parse(adminSettings);
+                console.log('📦 Admin: Loaded settings from localStorage');
+                return;
+            }
+
+            // Try JSON file
+            try {
+                const response = await fetch('content/settings/settings.json');
+                if (response.ok) {
+                    settings = await response.json();
+                    console.log('📁 Admin: Loaded settings from JSON');
+                    localStorage.setItem('portfolioSettings', JSON.stringify(settings));
+                    return;
+                }
+            } catch (error) {
+                console.log('⚠️ Admin: Could not load settings JSON');
+            }
+
+            // Fallback
+            settings = {
+                siteTitle: "Web Developer Portfolio",
+                siteDescription: "Professional web developer portfolio",
+                authorName: "Web Developer",
+                email: "hello@example.com",
+                phone: "+1 (555) 123-4567",
+                location: "San Francisco, CA"
+            };
+            console.log('🔧 Admin: Using sample settings');
+        }
+
+        async function loadAdminAbout() {
+            // Try admin localStorage first
+            const adminAbout = localStorage.getItem('portfolioAbout');
+            if (adminAbout) {
+                aboutData = JSON.parse(adminAbout);
+                console.log('📦 Admin: Loaded about data from localStorage');
+                return;
+            }
+
+            // Try JSON file
+            try {
+                const response = await fetch('content/about/about.json');
+                if (response.ok) {
+                    aboutData = await response.json();
+                    console.log('📁 Admin: Loaded about data from JSON');
+                    localStorage.setItem('portfolioAbout', JSON.stringify(aboutData));
+                    return;
+                }
+            } catch (error) {
+                console.log('⚠️ Admin: Could not load about JSON');
+            }
+
+            // Fallback
+            aboutData = {
+                name: "MD. RAJIN SHAHRIAR",
+                tagline: "Passionate Web Developer & Tech Entrepreneur",
+                image: "https://via.placeholder.com/400x500/667eea/ffffff?text=MD.+RAJIN+SHAHRIAR",
+                description: "Building modern, responsive, and user-friendly web experiences",
+                info: [
+                    { icon: "fa-graduation-cap", title: "Education", content: "BSc in Computer Science & Engineering" },
+                    { icon: "fa-briefcase", title: "Professional", content: "Founder & CEO at Devlify App" }
+                ]
+            };
+            console.log('🔧 Admin: Using sample about data');
         }
 
         function showTab(tabName) {
