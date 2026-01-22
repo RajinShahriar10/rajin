@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Portfolio Management</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 1rem;
+            min-height: 100vh;
+        }
+        
+        .admin-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-header h1 {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 1rem 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+        }
+        
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+        
+        .btn-add {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .project-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .project-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .project-title {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .project-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .project-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .tech-tag {
+            background: rgba(102, 126, 234, 0.2);
+            color: var(--accent-cyan);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .project-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .btn-edit, .btn-delete {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-edit {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .btn-edit:hover {
+            background: rgba(34, 197, 94, 0.3);
+        }
+        
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+        
+        .btn-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .tech-input-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .tech-input-group input {
+            flex: 1;
+        }
+        
+        .btn-add-tech {
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+        
+        .btn-save, .btn-cancel {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-save {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .btn-cancel {
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .admin-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Header -->
+    <div class="admin-header">
+        <h1>🚀 Portfolio Admin Dashboard</h1>
+        <div class="user-info">
+            <span><i class="fas fa-user"></i> <span id="currentUser">Admin</span></span>
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Admin Tabs -->
+    <div class="admin-tabs">
+        <button class="tab-btn active" onclick="showTab('projects')">
+            <i class="fas fa-folder"></i> Projects
+        </button>
+        <button class="tab-btn" onclick="showTab('skills')">
+            <i class="fas fa-cogs"></i> Skills
+        </button>
+        <button class="tab-btn" onclick="showTab('settings')">
+            <i class="fas fa-sliders-h"></i> Settings
+        </button>
+    </div>
+
+    <!-- Projects Tab -->
+    <div id="projects-tab" class="tab-content active">
+        <div class="section-header">
+            <h2>📝 Manage Projects</h2>
+            <button class="btn-add" onclick="openProjectModal()">
+                <i class="fas fa-plus"></i> Add New Project
+            </button>
+        </div>
+        <div id="projects-grid" class="projects-grid">
+            <!-- Projects will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Skills Tab -->
+    <div id="skills-tab" class="tab-content">
+        <div class="section-header">
+            <h2>💡 Manage Skills</h2>
+            <button class="btn-add" onclick="openSkillModal()">
+                <i class="fas fa-plus"></i> Add New Skill
+            </button>
+        </div>
+        <div id="skills-grid" class="projects-grid">
+            <!-- Skills will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="settings-tab" class="tab-content">
+        <div class="section-header">
+            <h2>⚙️ Site Settings</h2>
+        </div>
+        <div class="project-card">
+            <form id="settingsForm">
+                <div class="form-group">
+                    <label for="siteTitle">Site Title</label>
+                    <input type="text" id="siteTitle" name="siteTitle" value="Web Developer Portfolio">
+                </div>
+                <div class="form-group">
+                    <label for="siteDescription">Site Description</label>
+                    <textarea id="siteDescription" name="siteDescription">Professional web developer portfolio showcasing modern web development projects</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="authorName">Author Name</label>
+                    <input type="text" id="authorName" name="authorName" value="Web Developer">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="hello@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" name="phone" value="+1 (555) 123-4567">
+                </div>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" value="San Francisco, CA">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-save" onclick="saveSettings()">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="projectModalTitle">Add New Project</h3>
+                <button class="btn-close" onclick="closeProjectModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="projectForm">
+                <input type="hidden" id="projectId" name="projectId">
+                
+                <div class="form-group">
+                    <label for="projectTitle">Project Title</label>
+                    <input type="text" id="projectTitle" name="projectTitle" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="projectDescription">Description</label>
+                    <textarea id="projectDescription" name="projectDescription" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="projectImage">Image URL</label>
+                    <input type="url" id="projectImage" name="projectImage" placeholder="https://example.com/image.jpg">
+                </div>
+                
+                <div class="form-group">
+                    <label for="projectLiveUrl">Live Demo URL</label>
+                    <input type="url" id="projectLiveUrl" name="projectLiveUrl" placeholder="https://example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="projectGithubUrl">GitHub URL</label>
+                    <input type="url" id="projectGithubUrl" name="projectGithubUrl" placeholder="https://github.com/user/repo">
+                </div>
+                
+                <div class="form-group">
+                    <label>Technologies</label>
+                    <div id="techInputs" class="tech-input-group">
+                        <input type="text" placeholder="React, Node.js, MongoDB" class="tech-input">
+                        <button type="button" class="btn-add-tech" onclick="addTechInput()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeProjectModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-save">
+                        <i class="fas fa-save"></i> Save Project
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Skill Modal -->
+    <div id="skillModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="skillModalTitle">Add New Skill</h3>
+                <button class="btn-close" onclick="closeSkillModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="skillForm">
+                <input type="hidden" id="skillId" name="skillId">
+                
+                <div class="form-group">
+                    <label for="skillName">Skill Name</label>
+                    <input type="text" id="skillName" name="skillName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="skillIcon">Icon Class</label>
+                    <input type="text" id="skillIcon" name="skillIcon" placeholder="fab fa-react" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="skillLevel">Proficiency Level (0-100)</label>
+                    <input type="number" id="skillLevel" name="skillLevel" min="0" max="100" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="skillColor">Color</label>
+                    <input type="color" id="skillColor" name="skillColor" value="#667eea" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="skillCategory">Category</label>
+                    <select id="skillCategory" name="skillCategory" required>
+                        <option value="Frontend">Frontend</option>
+                        <option value="Backend">Backend</option>
+                        <option value="Database">Database</option>
+                        <option value="DevOps">DevOps</option>
+                        <option value="Design">Design</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeSkillModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-save">
+                        <i class="fas fa-save"></i> Save Skill
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Data storage (in production, use localStorage or backend)
+        let projects = JSON.parse(localStorage.getItem('portfolioProjects')) || [
+            {
+                id: 1,
+                title: "E-Commerce Platform",
+                description: "A full-stack e-commerce solution with React and Node.js",
+                image: "https://via.placeholder.com/400x200/667eea/ffffff?text=E-Commerce",
+                liveUrl: "https://example.com",
+                githubUrl: "https://github.com/example/ecommerce",
+                technologies: ["React", "Node.js", "MongoDB", "Stripe"]
+            },
+            {
+                id: 2,
+                title: "Task Management App",
+                description: "A productivity app with real-time collaboration features",
+                image: "https://via.placeholder.com/400x200/22c55e/ffffff?text=Task+App",
+                liveUrl: "https://example.com",
+                githubUrl: "https://github.com/example/tasks",
+                technologies: ["Vue.js", "Firebase", "Tailwind CSS"]
+            }
+        ];
+
+        let skills = JSON.parse(localStorage.getItem('portfolioSkills')) || [
+            {
+                id: 1,
+                name: "JavaScript",
+                icon: "fab fa-js",
+                level: 88,
+                color: "#F7DF1E",
+                category: "Frontend"
+            },
+            {
+                id: 2,
+                name: "React",
+                icon: "fab fa-react",
+                level: 85,
+                color: "#61DAFB",
+                category: "Frontend"
+            },
+            {
+                id: 3,
+                name: "Node.js",
+                icon: "fab fa-node-js",
+                level: 82,
+                color: "#339933",
+                category: "Backend"
+            }
+        ];
+
+        let settings = JSON.parse(localStorage.getItem('portfolioSettings')) || {
+            siteTitle: "Web Developer Portfolio",
+            siteDescription: "Professional web developer portfolio showcasing modern web development projects",
+            authorName: "Web Developer",
+            email: "hello@example.com",
+            phone: "+1 (555) 123-4567",
+            location: "San Francisco, CA"
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            renderProjects();
+            renderSkills();
+            loadSettings();
+        });
+
+        function checkAuth() {
+            if (sessionStorage.getItem('adminLoggedIn') !== 'true') {
+                window.location.href = 'auth.html';
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('adminLoggedIn');
+            sessionStorage.removeItem('adminUsername');
+            window.location.href = 'auth.html';
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function renderProjects() {
+            const grid = document.getElementById('projects-grid');
+            grid.innerHTML = '';
+            
+            projects.forEach(project => {
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                card.innerHTML = `
+                    <img src="${project.image}" alt="${project.title}" class="project-image">
+                    <h3 class="project-title">${project.title}</h3>
+                    <p class="project-description">${project.description}</p>
+                    <div class="project-tech">
+                        ${project.technologies.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
+                    </div>
+                    <div class="project-actions">
+                        <button class="btn-edit" onclick="editProject(${project.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn-delete" onclick="deleteProject(${project.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderSkills() {
+            const grid = document.getElementById('skills-grid');
+            grid.innerHTML = '';
+            
+            skills.forEach(skill => {
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                card.innerHTML = `
+                    <h3 class="project-title">${skill.name}</h3>
+                    <p class="project-description">
+                        <strong>Level:</strong> ${skill.level}%<br>
+                        <strong>Category:</strong> ${skill.category}<br>
+                        <strong>Icon:</strong> ${skill.icon}
+                    </p>
+                    <div class="project-actions">
+                        <button class="btn-edit" onclick="editSkill(${skill.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn-delete" onclick="deleteSkill(${skill.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function loadSettings() {
+            document.getElementById('siteTitle').value = settings.siteTitle;
+            document.getElementById('siteDescription').value = settings.siteDescription;
+            document.getElementById('authorName').value = settings.authorName;
+            document.getElementById('email').value = settings.email;
+            document.getElementById('phone').value = settings.phone;
+            document.getElementById('location').value = settings.location;
+        }
+
+        // Project Modal Functions
+        function openProjectModal(projectId = null) {
+            const modal = document.getElementById('projectModal');
+            const form = document.getElementById('projectForm');
+            
+            if (projectId) {
+                const project = projects.find(p => p.id === projectId);
+                document.getElementById('projectModalTitle').textContent = 'Edit Project';
+                document.getElementById('projectId').value = project.id;
+                document.getElementById('projectTitle').value = project.title;
+                document.getElementById('projectDescription').value = project.description;
+                document.getElementById('projectImage').value = project.image;
+                document.getElementById('projectLiveUrl').value = project.liveUrl;
+                document.getElementById('projectGithubUrl').value = project.githubUrl;
+                
+                // Load technologies
+                const techInputs = document.getElementById('techInputs');
+                techInputs.innerHTML = '';
+                project.technologies.forEach(tech => {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = tech;
+                    input.className = 'tech-input';
+                    input.style.marginBottom = '0.5rem';
+                    techInputs.appendChild(input);
+                });
+            } else {
+                document.getElementById('projectModalTitle').textContent = 'Add New Project';
+                form.reset();
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeProjectModal() {
+            document.getElementById('projectModal').classList.remove('active');
+        }
+
+        function editProject(id) {
+            openProjectModal(id);
+        }
+
+        function deleteProject(id) {
+            if (confirm('Are you sure you want to delete this project?')) {
+                projects = projects.filter(p => p.id !== id);
+                localStorage.setItem('portfolioProjects', JSON.stringify(projects));
+                renderProjects();
+            }
+        }
+
+        // Skill Modal Functions
+        function openSkillModal(skillId = null) {
+            const modal = document.getElementById('skillModal');
+            const form = document.getElementById('skillForm');
+            
+            if (skillId) {
+                const skill = skills.find(s => s.id === skillId);
+                document.getElementById('skillModalTitle').textContent = 'Edit Skill';
+                document.getElementById('skillId').value = skill.id;
+                document.getElementById('skillName').value = skill.name;
+                document.getElementById('skillIcon').value = skill.icon;
+                document.getElementById('skillLevel').value = skill.level;
+                document.getElementById('skillColor').value = skill.color;
+                document.getElementById('skillCategory').value = skill.category;
+            } else {
+                document.getElementById('skillModalTitle').textContent = 'Add New Skill';
+                form.reset();
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeSkillModal() {
+            document.getElementById('skillModal').classList.remove('active');
+        }
+
+        function editSkill(id) {
+            openSkillModal(id);
+        }
+
+        function deleteSkill(id) {
+            if (confirm('Are you sure you want to delete this skill?')) {
+                skills = skills.filter(s => s.id !== id);
+                localStorage.setItem('portfolioSkills', JSON.stringify(skills));
+                renderSkills();
+            }
+        }
+
+        function saveSettings() {
+            settings = {
+                siteTitle: document.getElementById('siteTitle').value,
+                siteDescription: document.getElementById('siteDescription').value,
+                authorName: document.getElementById('authorName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                location: document.getElementById('location').value
+            };
+            
+            localStorage.setItem('portfolioSettings', JSON.stringify(settings));
+            alert('Settings saved successfully!');
+        }
+
+        // Form Submissions
+        document.getElementById('projectForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const projectId = document.getElementById('projectId').value;
+            const techInputs = document.querySelectorAll('.tech-input');
+            const technologies = Array.from(techInputs).map(input => input.value).filter(val => val.trim() !== '');
+            
+            const projectData = {
+                id: projectId ? parseInt(projectId) : Date.now(),
+                title: document.getElementById('projectTitle').value,
+                description: document.getElementById('projectDescription').value,
+                image: document.getElementById('projectImage').value,
+                liveUrl: document.getElementById('projectLiveUrl').value,
+                githubUrl: document.getElementById('projectGithubUrl').value,
+                technologies: technologies
+            };
+            
+            if (projectId) {
+                projects = projects.map(p => p.id === parseInt(projectId) ? projectData : p);
+            } else {
+                projects.push(projectData);
+            }
+            
+            localStorage.setItem('portfolioProjects', JSON.stringify(projects));
+            renderProjects();
+            closeProjectModal();
+        });
+
+        document.getElementById('skillForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const skillId = document.getElementById('skillId').value;
+            const skillData = {
+                id: skillId ? parseInt(skillId) : Date.now(),
+                name: document.getElementById('skillName').value,
+                icon: document.getElementById('skillIcon').value,
+                level: parseInt(document.getElementById('skillLevel').value),
+                color: document.getElementById('skillColor').value,
+                category: document.getElementById('skillCategory').value
+            };
+            
+            if (skillId) {
+                skills = skills.map(s => s.id === parseInt(skillId) ? skillData : s);
+            } else {
+                skills.push(skillData);
+            }
+            
+            localStorage.setItem('portfolioSkills', JSON.stringify(skills));
+            renderSkills();
+            closeSkillModal();
+        });
+
+        function addTechInput() {
+            const techInputs = document.getElementById('techInputs');
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.placeholder = 'Technology name';
+            newInput.className = 'tech-input';
+            newInput.style.marginBottom = '0.5rem';
+            techInputs.appendChild(newInput);
+        }
+    </script>
+</body>
+</html>

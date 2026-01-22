@@ -17,71 +17,45 @@
             margin: 0;
             padding: 2rem;
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .admin-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .admin-header {
+        .redirect-container {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
             border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 2rem;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 100%;
             text-align: center;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
         }
         
-        .admin-header h1 {
+        .redirect-container h1 {
             background: var(--primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin: 0 0 1rem 0;
+            margin: 0 0 2rem 0;
             font-size: 2rem;
         }
         
-        .admin-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .admin-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 2rem;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-        
-        .admin-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        }
-        
-        .admin-card h3 {
-            color: var(--accent-cyan);
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
-        }
-        
-        .admin-card p {
+        .redirect-container p {
             color: var(--text-secondary);
             line-height: 1.6;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
         
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
+            padding: 1rem 2rem;
+            background: var(--primary-gradient);
+            color: white;
             border: none;
             border-radius: 8px;
             font-weight: 600;
@@ -90,239 +64,57 @@
             cursor: pointer;
         }
         
-        .btn-primary {
-            background: var(--primary-gradient);
-            color: white;
-        }
-        
-        .btn-primary:hover {
+        .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
         
-        .btn-secondary {
-            background: var(--glass-bg);
-            color: var(--text-primary);
-            border: 1px solid var(--glass-border);
+        .quick-links {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--glass-border);
         }
         
-        .btn-secondary:hover {
-            background: var(--bg-secondary);
+        .quick-links a {
+            display: block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s ease;
         }
         
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-        
-        .status-success {
-            background: rgba(34, 197, 94, 0.2);
-            color: #22c55e;
-        }
-        
-        .status-warning {
-            background: rgba(245, 158, 11, 0.2);
-            color: #f59e0b;
-        }
-        
-        .quick-actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .info-box {
-            background: rgba(102, 126, 234, 0.1);
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            border-radius: 10px;
-            padding: 1rem;
-            margin: 1rem 0;
-            text-align: left;
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            
-            .admin-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-            
-            .quick-actions {
-                flex-direction: column;
-            }
+        .quick-links a:hover {
+            color: var(--accent-cyan);
         }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <!-- Admin Header -->
-        <div class="admin-header">
-            <h1>🚀 Portfolio Admin Dashboard</h1>
-            <div class="status-indicator status-success">
-                <i class="fas fa-check-circle"></i>
-                <span>System Online</span>
-            </div>
-            <p style="color: var(--text-secondary); margin: 0;">
-                Manage your portfolio content, projects, and settings
-            </p>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="admin-grid">
-            <div class="admin-card">
-                <h3>📝 Manage Projects</h3>
-                <p>Add, edit, or delete portfolio projects with images and descriptions</p>
-                <div class="quick-actions">
-                    <a href="https://github.com/RajinShahriar10/rajin/tree/main/content/projects" target="_blank" class="btn btn-primary">
-                        <i class="fas fa-plus"></i>
-                        <span>Manage Projects</span>
-                    </a>
-                    <a href="https://github.com/RajinShahriar10/rajin/tree/main/assets/images" target="_blank" class="btn btn-secondary">
-                        <i class="fas fa-images"></i>
-                        <span>View Images</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="admin-card">
-                <h3>💡 Manage Skills</h3>
-                <p>Update your technical skills and proficiency levels</p>
-                <div class="quick-actions">
-                    <a href="https://github.com/RajinShahriar10/rajin/tree/main/content/skills" target="_blank" class="btn btn-primary">
-                        <i class="fas fa-cog"></i>
-                        <span>Manage Skills</span>
-                    </a>
-                    <a href="#" onclick="showSkillsGuide()" class="btn btn-secondary">
-                        <i class="fas fa-question-circle"></i>
-                        <span>Skills Guide</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="admin-card">
-                <h3>⚙️ Site Settings</h3>
-                <p>Update site information, contact details, and social links</p>
-                <div class="quick-actions">
-                    <a href="https://github.com/RajinShahriar10/rajin/tree/main/content/settings" target="_blank" class="btn btn-primary">
-                        <i class="fas fa-sliders-h"></i>
-                        <span>Site Settings</span>
-                    </a>
-                    <a href="#" onclick="showSettingsGuide()" class="btn btn-secondary">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Settings Guide</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="admin-card">
-                <h3>📊 Site Analytics</h3>
-                <p>Monitor your portfolio performance and visitor statistics</p>
-                <div class="quick-actions">
-                    <a href="https://app.netlify.com/sites/rajinshahriar.netlify.app/overview" target="_blank" class="btn btn-primary">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Netlify Analytics</span>
-                    </a>
-                    <a href="https://rajinshahriar.netlify.app/" target="_blank" class="btn btn-secondary">
-                        <i class="fas fa-eye"></i>
-                        <span>View Site</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Information Section -->
-        <div class="admin-card">
-            <h3>📋 Quick Reference</h3>
-            <div class="info-box">
-                <strong>📁 Content Structure:</strong><br>
-                <code style="background: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px;">
-                    content/projects/ - Portfolio projects<br>
-                    content/skills/ - Technical skills<br>
-                    content/settings/ - Site configuration<br>
-                    assets/images/ - Media files
-                </code>
-            </div>
-            <div class="info-box">
-                <strong>🔄 Deployment:</strong><br>
-                Changes pushed to GitHub automatically deploy to Netlify within 1-2 minutes.
-            </div>
-            <div class="info-box">
-                <strong>🛡️ Security:</strong><br>
-                Admin access is protected by Netlify Identity. Only authorized users can make changes.
-            </div>
-        </div>
-
-        <!-- Status Section -->
-        <div class="admin-card">
-            <h3>🔧 System Status</h3>
-            <div style="text-align: left;">
-                <div class="status-indicator status-success">
-                    <i class="fas fa-check-circle"></i>
-                    <span>GitHub Repository: Connected</span>
-                </div>
-                <div class="status-indicator status-success">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Netlify Deployment: Active</span>
-                </div>
-                <div class="status-indicator status-success">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Content Management: Available</span>
-                </div>
-                <div class="status-indicator status-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Advanced CMS: Simplified Mode</span>
-                </div>
-            </div>
+    <div class="redirect-container">
+        <h1>🚀 Portfolio Admin</h1>
+        <p>Welcome to your portfolio management system. Please choose where you'd like to go:</p>
+        
+        <a href="auth.html" class="btn">
+            <i class="fas fa-sign-in-alt"></i> Go to Login
+        </a>
+        
+        <div class="quick-links">
+            <a href="dashboard.html" onclick="sessionStorage.setItem('adminLoggedIn', 'true'); sessionStorage.setItem('adminUsername', 'admin');">
+                <i class="fas fa-tachometer-alt"></i> Quick Access Dashboard (Demo)
+            </a>
+            <a href="https://github.com/RajinShahriar10/rajin/tree/main/content" target="_blank">
+                <i class="fas fa-code-branch"></i> Manage Content on GitHub
+            </a>
+            <a href="https://app.netlify.com/sites/rajinshahriar.netlify.app/overview" target="_blank">
+                <i class="fas fa-chart-line"></i> View Netlify Analytics
+            </a>
         </div>
     </div>
 
     <script>
-        function showSkillsGuide() {
-            alert('💡 Skills Management Guide:\n\n' +
-                  '1. Go to content/skills/ folder\n' +
-                  '2. Edit or create .md files\n' +
-                  '3. Format: name, icon, level, color, category\n' +
-                  '4. Push changes to deploy\n\n' +
-                  'Example:\n' +
-                  'name: JavaScript\n' +
-                  'icon: fab fa-js\n' +
-                  'level: 88\n' +
-                  'color: #F7DF1E');
+        // Check if already logged in
+        if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+            window.location.href = 'dashboard.html';
         }
-
-        function showSettingsGuide() {
-            alert('⚙️ Settings Management Guide:\n\n' +
-                  '1. Go to content/settings/ folder\n' +
-                  '2. Edit general.json or social.json\n' +
-                  '3. Update site information\n' +
-                  '4. Push changes to deploy\n\n' +
-                  'General Settings: title, description, contact\n' +
-                  'Social Settings: GitHub, LinkedIn, Twitter links');
-        }
-
-        // Check deployment status
-        fetch('https://rajinshahriar.netlify.app/')
-            .then(response => response.ok ? 'success' : 'error')
-            .then(status => {
-                console.log('🌐 Site Status:', status);
-            })
-            .catch(error => {
-                console.log('⚠️ Site Check Failed:', error);
-            });
-
-        console.log('🚀 Admin Dashboard Loaded Successfully');
-        console.log('📁 Repository: https://github.com/RajinShahriar10/rajin');
-        console.log('🌐 Live Site: https://rajinshahriar.netlify.app');
     </script>
 </body>
 </html>
