@@ -321,6 +321,52 @@
             cursor: pointer;
         }
         
+        .image-upload-area {
+            border: 2px dashed var(--glass-border);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: var(--bg-tertiary);
+        }
+        
+        .image-upload-area:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 212, 255, 0.05);
+        }
+        
+        .image-upload-area.dragover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 212, 255, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .image-preview {
+            margin-top: 1rem;
+            max-width: 100%;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .upload-info {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .upload-icon {
+            font-size: 2rem;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+        }
+        
         .form-actions {
             display: flex;
             gap: 1rem;
@@ -351,19 +397,6 @@
         .btn-save:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        .success-message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(34, 197, 94, 0.9);
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            z-index: 10000;
-            max-width: 300px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
         
         @media (max-width: 768px) {
@@ -498,7 +531,21 @@
                 
                 <div class="form-group">
                     <label for="projectImage">Project Image</label>
-                    <input type="url" id="projectImage" name="projectImage" placeholder="https://example.com/image.jpg">
+                    <div class="image-upload-area" id="imageUploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-info">
+                            <strong>Click to upload or drag and drop</strong><br>
+                            PNG, JPG, GIF up to 10MB
+                        </div>
+                        <input type="file" id="projectImageFile" accept="image/*" style="display: none;">
+                        <input type="hidden" id="projectImageData" name="projectImageData">
+                    </div>
+                    <div class="image-preview" id="imagePreview">
+                        <img id="previewImg" src="" alt="Preview">
+                    </div>
+                    <input type="url" id="projectImage" name="projectImage" placeholder="Or enter image URL directly" style="margin-top: 1rem;">
                 </div>
                 
                 <div class="form-group">
@@ -590,17 +637,134 @@
     </div>
 
     <script>
-        // Initialize data manager
-        let dataManager;
-        let projects = [];
-        let skills = [];
-        let settings = {};
+        // Data storage (in production, use localStorage or backend)
+        let projects = JSON.parse(localStorage.getItem('portfolioProjects')) || [
+            {
+                id: 1,
+                title: "E-Commerce Platform",
+                description: "A full-stack e-commerce solution with React and Node.js, featuring user authentication, payment processing, and inventory management.",
+                image: "https://via.placeholder.com/400x200/667eea/ffffff?text=E-Commerce",
+                liveUrl: "https://example-ecommerce.com",
+                githubUrl: "https://github.com/example/ecommerce",
+                technologies: ["React", "Node.js", "MongoDB", "Stripe", "JWT", "Tailwind CSS"]
+            },
+            {
+                id: 2,
+                title: "Task Management App",
+                description: "A productivity app with real-time collaboration features, drag-and-drop functionality, and team management capabilities.",
+                image: "https://via.placeholder.com/400x200/22c55e/ffffff?text=Task+App",
+                liveUrl: "https://example-tasks.com",
+                githubUrl: "https://github.com/example/tasks",
+                technologies: ["Vue.js", "Firebase", "Tailwind CSS", "Vuex", "Socket.io"]
+            },
+            {
+                id: 3,
+                title: "Weather Dashboard",
+                description: "A beautiful weather application with real-time data, interactive maps, and detailed forecasts for multiple locations.",
+                image: "https://via.placeholder.com/400x200/3b82f6/ffffff?text=Weather",
+                liveUrl: "https://example-weather.com",
+                githubUrl: "https://github.com/example/weather",
+                technologies: ["JavaScript", "HTML5", "CSS3", "OpenWeather API", "Chart.js"]
+            },
+            {
+                id: 4,
+                title: "Social Media Analytics",
+                description: "Analytics dashboard for social media platforms with data visualization, engagement metrics, and automated reporting.",
+                image: "https://via.placeholder.com/400x200/8b5cf6/ffffff?text=Analytics",
+                liveUrl: "https://example-analytics.com",
+                githubUrl: "https://github.com/example/analytics",
+                technologies: ["Python", "Django", "React", "PostgreSQL", "Redis", "D3.js"]
+            },
+            {
+                id: 5,
+                title: "Portfolio Website",
+                description: "A modern, responsive portfolio website with smooth animations, dark mode, and optimized performance.",
+                image: "https://via.placeholder.com/400x200/ef4444/ffffff?text=Portfolio",
+                liveUrl: "https://example-portfolio.com",
+                githubUrl: "https://github.com/example/portfolio",
+                technologies: ["HTML5", "CSS3", "JavaScript", "GSAP", "Intersection Observer"]
+            }
+        ];
+
+        let skills = JSON.parse(localStorage.getItem('portfolioSkills')) || [
+            {
+                id: 1,
+                name: "JavaScript",
+                icon: "fab fa-js",
+                level: 88,
+                color: "#F7DF1E",
+                category: "Frontend"
+            },
+            {
+                id: 2,
+                name: "React",
+                icon: "fab fa-react",
+                level: 85,
+                color: "#61DAFB",
+                category: "Frontend"
+            },
+            {
+                id: 3,
+                name: "Node.js",
+                icon: "fab fa-node-js",
+                level: 82,
+                color: "#339933",
+                category: "Backend"
+            },
+            {
+                id: 4,
+                name: "Python",
+                icon: "fab fa-python",
+                level: 78,
+                color: "#3776AB",
+                category: "Backend"
+            },
+            {
+                id: 5,
+                name: "MongoDB",
+                icon: "fas fa-database",
+                level: 75,
+                color: "#47A248",
+                category: "Database"
+            },
+            {
+                id: 6,
+                name: "Docker",
+                icon: "fab fa-docker",
+                level: 70,
+                color: "#2496ED",
+                category: "DevOps"
+            },
+            {
+                id: 7,
+                name: "Git",
+                icon: "fab fa-git-alt",
+                level: 90,
+                color: "#F05032",
+                category: "DevOps"
+            },
+            {
+                id: 8,
+                name: "Tailwind CSS",
+                icon: "fab fa-css3-alt",
+                level: 86,
+                color: "#06B6D4",
+                category: "Frontend"
+            }
+        ];
+
+        let settings = JSON.parse(localStorage.getItem('portfolioSettings')) || {
+            siteTitle: "Web Developer Portfolio",
+            siteDescription: "Professional web developer portfolio showcasing modern web development projects",
+            authorName: "Web Developer",
+            email: "hello@example.com",
+            phone: "+1 (555) 123-4567",
+            location: "San Francisco, CA"
+        };
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
-            dataManager = new DataManager();
-            await loadData();
             renderProjects();
             renderSkills();
             loadSettings();
@@ -616,18 +780,6 @@
             sessionStorage.removeItem('adminLoggedIn');
             sessionStorage.removeItem('adminUsername');
             window.location.href = 'auth.html';
-        }
-
-        async loadData() {
-            try {
-                projects = await dataManager.loadData('projects');
-                skills = await dataManager.loadData('skills');
-                settings = await dataManager.loadData('settings');
-                console.log('✅ Data loaded successfully');
-            } catch (error) {
-                console.error('❌ Failed to load data:', error);
-                showMessage('Failed to load data: ' + error.message, 'error');
-            }
         }
 
         function showTab(tabName) {
@@ -699,12 +851,12 @@
         }
 
         function loadSettings() {
-            document.getElementById('siteTitle').value = settings.siteTitle || 'Web Developer Portfolio';
-            document.getElementById('siteDescription').value = settings.siteDescription || 'Professional web developer portfolio';
-            document.getElementById('authorName').value = settings.authorName || 'Web Developer';
-            document.getElementById('email').value = settings.email || 'hello@example.com';
-            document.getElementById('phone').value = settings.phone || '+1 (555) 123-4567';
-            document.getElementById('location').value = settings.location || 'San Francisco, CA';
+            document.getElementById('siteTitle').value = settings.siteTitle;
+            document.getElementById('siteDescription').value = settings.siteDescription;
+            document.getElementById('authorName').value = settings.authorName;
+            document.getElementById('email').value = settings.email;
+            document.getElementById('phone').value = settings.phone;
+            document.getElementById('location').value = settings.location;
         }
 
         // Project Modal Functions
@@ -718,7 +870,7 @@
                 document.getElementById('projectId').value = project.id;
                 document.getElementById('projectTitle').value = project.title;
                 document.getElementById('projectDescription').value = project.description;
-                document.getElementById('projectImage').value = project.image;
+                document.getElementById('projectImage').value = project.image.startsWith('data:') ? '' : project.image;
                 document.getElementById('projectLiveUrl').value = project.liveUrl;
                 document.getElementById('projectGithubUrl').value = project.githubUrl;
                 
@@ -733,12 +885,36 @@
                     input.style.marginBottom = '0.5rem';
                     techInputs.appendChild(input);
                 });
+                
+                // Show existing image preview
+                setTimeout(() => {
+                    const previewImg = document.getElementById('previewImg');
+                    const imagePreview = document.getElementById('imagePreview');
+                    const imageDataInput = document.getElementById('projectImageData');
+                    
+                    if (project.image) {
+                        previewImg.src = project.image;
+                        imagePreview.style.display = 'block';
+                        if (project.image.startsWith('data:')) {
+                            imageDataInput.value = project.image;
+                        }
+                    }
+                }, 100);
             } else {
                 document.getElementById('projectModalTitle').textContent = 'Add New Project';
                 form.reset();
+                setTimeout(() => {
+                    const imagePreview = document.getElementById('imagePreview');
+                    imagePreview.style.display = 'none';
+                }, 100);
             }
             
             modal.classList.add('active');
+            
+            // Initialize image upload after modal opens
+            setTimeout(() => {
+                initializeImageUpload();
+            }, 100);
         }
 
         function closeProjectModal() {
@@ -749,10 +925,10 @@
             openProjectModal(id);
         }
 
-        async function deleteProject(id) {
+        function deleteProject(id) {
             if (confirm('Are you sure you want to delete this project?')) {
                 projects = projects.filter(p => p.id !== id);
-                await saveData('projects', projects);
+                localStorage.setItem('portfolioProjects', JSON.stringify(projects));
                 renderProjects();
             }
         }
@@ -787,15 +963,15 @@
             openSkillModal(id);
         }
 
-        async function deleteSkill(id) {
+        function deleteSkill(id) {
             if (confirm('Are you sure you want to delete this skill?')) {
                 skills = skills.filter(s => s.id !== id);
-                await saveData('skills', skills);
+                localStorage.setItem('portfolioSkills', JSON.stringify(skills));
                 renderSkills();
             }
         }
 
-        async function saveSettings() {
+        function saveSettings() {
             settings = {
                 siteTitle: document.getElementById('siteTitle').value,
                 siteDescription: document.getElementById('siteDescription').value,
@@ -805,61 +981,51 @@
                 location: document.getElementById('location').value
             };
             
-            await saveData('settings', settings);
-            showMessage('Settings saved successfully! Changes will appear on the website after refresh.', 'success');
-        }
-
-        async function saveData(dataType, data) {
-            try {
-                await dataManager.saveData(dataType, data);
-                showMessage(`${dataType} saved successfully! Changes will appear on the website after refresh.`, 'success');
-            } catch (error) {
-                console.error('Save error:', error);
-                showMessage('Failed to save: ' + error.message, 'error');
-            }
-        }
-
-        function showMessage(message, type) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'success-message';
-            if (type === 'error') {
-                messageDiv.style.background = 'rgba(239, 68, 68, 0.9)';
-            }
-            messageDiv.innerHTML = `
-                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i> ${message}<br>
-                <small><a href="${window.location.origin}" target="_blank" style="color: white; text-decoration: underline;">View Website</a></small>
+            localStorage.setItem('portfolioSettings', JSON.stringify(settings));
+            
+            // Show success message and offer to refresh website
+            const successMessage = document.createElement('div');
+            successMessage.className = 'success-message';
+            successMessage.innerHTML = `
+                <i class="fas fa-check-circle"></i> Settings saved successfully!<br>
+                <small>Changes will appear on the website after refresh.</small><br>
+                <button onclick="refreshWebsite()" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: var(--accent-cyan); color: var(--bg-primary); border: none; border-radius: 6px; cursor: pointer;">
+                    <i class="fas fa-sync"></i> Refresh Website
+                </button>
             `;
             
-            document.body.appendChild(messageDiv);
+            const form = document.getElementById('settingsForm');
+            form.appendChild(successMessage);
             
             setTimeout(() => {
-                messageDiv.remove();
-            }, 4000);
+                successMessage.remove();
+            }, 5000);
         }
 
-        function addTechInput() {
-            const techInputs = document.getElementById('techInputs');
-            const newInput = document.createElement('input');
-            newInput.type = 'text';
-            newInput.placeholder = 'Technology name';
-            newInput.className = 'tech-input';
-            newInput.style.marginBottom = '0.5rem';
-            techInputs.appendChild(newInput);
+        function refreshWebsite() {
+            // Open website in new tab with refresh
+            const websiteUrl = window.location.origin;
+            window.open(websiteUrl, '_blank');
         }
 
         // Form Submissions
-        document.getElementById('projectForm').addEventListener('submit', async function(e) {
+        document.getElementById('projectForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const projectId = document.getElementById('projectId').value;
             const techInputs = document.querySelectorAll('.tech-input');
             const technologies = Array.from(techInputs).map(input => input.value).filter(val => val.trim() !== '');
             
+            // Handle image - prioritize uploaded file over URL
+            const imageData = document.getElementById('projectImageData').value;
+            const imageUrl = document.getElementById('projectImage').value;
+            const finalImage = imageData || imageUrl || 'https://via.placeholder.com/400x200/667eea/ffffff?text=No+Image';
+            
             const projectData = {
                 id: projectId ? parseInt(projectId) : Date.now(),
                 title: document.getElementById('projectTitle').value,
                 description: document.getElementById('projectDescription').value,
-                image: document.getElementById('projectImage').value || 'https://via.placeholder.com/400x200/667eea/ffffff?text=No+Image',
+                image: finalImage,
                 liveUrl: document.getElementById('projectLiveUrl').value,
                 githubUrl: document.getElementById('projectGithubUrl').value,
                 technologies: technologies
@@ -871,12 +1037,15 @@
                 projects.push(projectData);
             }
             
-            await saveData('projects', projects);
+            localStorage.setItem('portfolioProjects', JSON.stringify(projects));
             renderProjects();
             closeProjectModal();
+            
+            // Show success message with refresh option
+            showSuccessMessage('Project saved successfully! Changes will appear on the website after refresh.');
         });
 
-        document.getElementById('skillForm').addEventListener('submit', async function(e) {
+        document.getElementById('skillForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const skillId = document.getElementById('skillId').value;
@@ -895,10 +1064,131 @@
                 skills.push(skillData);
             }
             
-            await saveData('skills', skills);
+            localStorage.setItem('portfolioSkills', JSON.stringify(skills));
             renderSkills();
             closeSkillModal();
-        });
-    </script>
+            
+            // Show success message with refresh option
+            showSuccessMessage('Skill saved successfully! Changes will appear on the website after refresh.');
+        }
+
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(34, 197, 94, 0.9);
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                z-index: 10000;
+                max-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            successDiv.innerHTML = `
+                <i class="fas fa-check-circle"></i> ${message}<br>
+                <small><a href="${window.location.origin}" target="_blank" style="color: white; text-decoration: underline;">View Website</a></small>
+            `;
+            
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 4000);
+        }
+
+        function addTechInput() {
+            const techInputs = document.getElementById('techInputs');
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.placeholder = 'Technology name';
+            newInput.className = 'tech-input';
+            newInput.style.marginBottom = '0.5rem';
+            techInputs.appendChild(newInput);
+        }
+
+        // Image Upload Functionality
+        function initializeImageUpload() {
+            const uploadArea = document.getElementById('imageUploadArea');
+            const fileInput = document.getElementById('projectImageFile');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            const imageDataInput = document.getElementById('projectImageData');
+            const imageUrlInput = document.getElementById('projectImage');
+
+            // Click to upload
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File selection
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    handleImageFile(file);
+                }
+            });
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type.startsWith('image/')) {
+                        handleImageFile(file);
+                    } else {
+                        alert('Please upload an image file (PNG, JPG, GIF)');
+                    }
+                }
+            });
+
+            function handleImageFile(file) {
+                // Check file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File size must be less than 10MB');
+                    return;
+                }
+
+                // Read and display preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageData = e.target.result;
+                    previewImg.src = imageData;
+                    imagePreview.style.display = 'block';
+                    imageDataInput.value = imageData;
+                    imageUrlInput.value = ''; // Clear URL input when file is selected
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Handle URL input changes
+            imageUrlInput.addEventListener('input', (e) => {
+                const url = e.target.value;
+                if (url) {
+                    previewImg.src = url;
+                    imagePreview.style.display = 'block';
+                    imageDataInput.value = ''; // Clear file input when URL is entered
+                    fileInput.value = ''; // Clear file input
+                } else {
+                    imagePreview.style.display = 'none';
+                }
+            });
+        }
+
+        </script>
 </body>
 </html>
