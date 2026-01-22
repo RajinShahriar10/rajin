@@ -1621,30 +1621,30 @@
                 const quotaPercentage = (totalSize / storage.quota) * 100;
                 
                 if (quotaPercentage > 90) {
-                    console.log(`⚠️ localStorage nearly full (${quotaPercentage.toFixed(1)}%), but unlimited storage available`);
+                    console.log(`⚠️ localStorage nearly full (${quotaPercentage.toFixed(1)}%), but cloud storage available`);
                 }
                 
                 // Save to localStorage first (immediate access)
                 localStorage.setItem(existingKey, JSON.stringify(data));
                 console.log(`✅ ${dataType} saved to localStorage`);
                 
-                // Save to unlimited storage (cross-device sync, no limits)
-                if (typeof saveToUnlimited === 'function') {
+                // Save to real cloud storage (GitHub - actually updates website)
+                if (typeof saveToRealCloud === 'function') {
                     try {
-                        const success = await saveToUnlimited(dataType, data);
+                        const success = await saveToRealCloud(dataType, data);
                         if (success) {
-                            console.log(`🔥 ${dataType} saved to unlimited storage`);
-                            showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved successfully! Changes sync across all devices with unlimited storage.`, 'success');
+                            console.log(`🌐 ${dataType} saved to GitHub - website will update!`);
+                            showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved successfully! Website will update in 1-2 minutes.`, 'success');
                         } else {
-                            console.log(`⚠️ Unlimited storage failed, but local save worked`);
-                            showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved locally! Unlimited sync unavailable.`, 'success');
+                            console.log(`⚠️ Cloud save failed, but local save worked`);
+                            showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved locally! Add GitHub token for online sync.`, 'warning');
                         }
                     } catch (error) {
-                        console.log(`⚠️ Unlimited storage failed, but local save worked:`, error);
-                        showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved locally! Cloud sync unavailable.`, 'success');
+                        console.log(`⚠️ Cloud save failed, but local save worked:`, error);
+                        showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved locally! Add GitHub token for online sync.`, 'warning');
                     }
                 } else {
-                    showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved successfully! Changes saved locally.`, 'success');
+                    showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved locally! Cloud sync unavailable.`, 'success');
                 }
                 
                 // Trigger cross-device sync notification
@@ -1930,7 +1930,7 @@
         });
     </script>
     
-    <!-- Unlimited Storage for Online Saving -->
-    <script src="../js/firebase-storage.js"></script>
+    <!-- Real Cloud Storage for Online Saving -->
+    <script src="../js/real-cloud-storage.js"></script>
 </body>
 </html>
