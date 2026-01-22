@@ -58,18 +58,27 @@ class SyncManager {
             const response = await fetch('https://api.github.com/repos/RajinShahriar10/rajin/commits/main');
             if (response.ok) {
                 const commits = await response.json();
-                const lastCommit = commits[0];
-                const commitTime = new Date(lastCommit.commit.committer.date).getTime();
+                console.log('🌐 GitHub API response:', commits);
                 
-                if (commitTime > this.lastSyncTime) {
-                    console.log('🌐 New GitHub commit detected, refreshing...');
-                    await this.refreshProjects();
-                    this.lastSyncTime = Date.now();
-                    localStorage.setItem('lastSyncTime', this.lastSyncTime);
+                if (commits && commits.length > 0 && commits[0] && commits[0].commit) {
+                    const lastCommit = commits[0];
+                    const commitTime = new Date(lastCommit.commit.committer.date).getTime();
+                    
+                    if (commitTime > this.lastSyncTime) {
+                        console.log('🌐 New GitHub commit detected, refreshing...');
+                        await this.refreshProjects();
+                        this.lastSyncTime = Date.now();
+                        localStorage.setItem('lastSyncTime', this.lastSyncTime);
+                    }
+                } else {
+                    console.log('🌐 No new commits found');
                 }
+            } else {
+                console.log('⚠️ GitHub API request failed:', response.status, response.statusText);
             }
         } catch (error) {
-            console.log('⚠️ Could not check GitHub updates:', error);
+            console.log('⚠️ Could not check GitHub updates:', error.message);
+            // Don't throw error - just log it and continue
         }
     }
 
@@ -85,18 +94,39 @@ class SyncManager {
 
             // Also refresh other components if they exist
             if (window.skillsManager) {
-                await window.skillsManager.loadSkills();
+                try {
+                    await window.skillsManager.loadSkills();
+                    console.log('✅ Skills refreshed successfully');
+                } catch (error) {
+                    console.log('⚠️ Could not refresh skills:', error.message);
+                }
             }
 
             if (window.aboutManager) {
-                await window.aboutManager.loadAboutData();
+                try {
+                    await window.aboutManager.loadAboutData();
+                    console.log('✅ About data refreshed successfully');
+                } catch (error) {
+                    console.log('⚠️ Could not refresh about data:', error.message);
+                }
+            }
+
+            // Also refresh dynamic loader if available
+            if (window.dynamicLoader) {
+                try {
+                    await window.dynamicLoader.refreshData('projects');
+                    console.log('✅ Dynamic loader refreshed successfully');
+                } catch (error) {
+                    console.log('⚠️ Could not refresh dynamic loader:', error.message);
+                }
             }
 
             // Show update notification
             this.showUpdateNotification();
             
         } catch (error) {
-            console.log('❌ Error refreshing projects:', error);
+            console.log('❌ Error refreshing projects:', error.message);
+            // Don't throw - just log and continue
         }
     }
 
