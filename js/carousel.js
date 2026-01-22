@@ -12,38 +12,68 @@ class CinematicCarousel {
     }
 
     init() {
-        this.loadProjects();
-        this.setupEventListeners();
-        this.startAutoplay();
+        // Add a small delay for mobile browsers to ensure localStorage is ready
+        const initDelay = window.innerWidth <= 768 ? 500 : 100;
+        
+        setTimeout(() => {
+            this.loadProjects();
+            this.setupEventListeners();
+            this.startAutoplay();
+        }, initDelay);
     }
 
     async loadProjects() {
+        console.log('🔄 Starting to load projects...');
+        
         try {
             // First try to load from admin localStorage ( DataManager compatible)
             const adminProjects = localStorage.getItem('portfolioProjects');
+            console.log('📦 Checking localStorage for projects:', adminProjects ? 'Found' : 'Not found');
+            
             if (adminProjects) {
-                this.projects = JSON.parse(adminProjects);
-                console.log('📦 Loaded projects from admin panel:', this.projects.length);
+                try {
+                    this.projects = JSON.parse(adminProjects);
+                    console.log('✅ Successfully loaded projects from admin panel:', this.projects.length);
+                    
+                    // Validate projects data
+                    if (!Array.isArray(this.projects) || this.projects.length === 0) {
+                        console.log('⚠️ Invalid projects data, using fallback');
+                        this.projects = this.getSampleProjects();
+                    }
+                } catch (parseError) {
+                    console.log('❌ Failed to parse projects data:', parseError);
+                    this.projects = this.getSampleProjects();
+                }
             } else {
+                console.log('📁 No admin projects found, trying JSON file...');
                 // Try to load from data file
                 const response = await fetch('content/projects/projects.json');
                 if (response.ok) {
                     this.projects = await response.json();
-                    console.log('📁 Loaded projects from JSON file');
+                    console.log('✅ Loaded projects from JSON file:', this.projects.length);
                 } else {
                     // Final fallback to sample projects
                     this.projects = this.getSampleProjects();
-                    console.log('🔧 Using sample projects');
+                    console.log('🔧 Using sample projects (JSON fetch failed)');
                 }
             }
         } catch (error) {
-            console.log('⚠️ Using sample projects:', error);
+            console.log('❌ Error loading projects:', error);
             this.projects = this.getSampleProjects();
         }
         
+        console.log('🎯 Final projects count:', this.projects.length);
+        console.log('📋 Projects data:', this.projects);
+        
+        // Force render even if no projects found
         this.renderProjects();
         this.renderIndicators();
         this.updateCarousel();
+        
+        // Add mobile-specific debugging
+        if (window.innerWidth <= 768) {
+            console.log('📱 Mobile detected - Projects loaded:', this.projects.length);
+        }
     }
 
     getSampleProjects() {
@@ -279,9 +309,15 @@ class CinematicCarousel {
     }
 }
 
-// Initialize carousel when DOM is ready
+// Initialize carousel when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    new CinematicCarousel();
+    window.carousel = new CinematicCarousel();
+    
+    // Add manual refresh for debugging (call from console: carousel.refreshProjects())
+    window.carousel.refreshProjects = function() {
+        console.log('🔄 Manual refresh triggered');
+        this.loadProjects();
+    };
 });
 
 // Add CSS for project cards if not already present
