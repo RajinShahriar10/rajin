@@ -1616,27 +1616,31 @@
                 // Calculate new data size
                 const newDataSize = JSON.stringify(data).length;
                 
-                // Check if we're approaching quota
+                // Check if we're approaching quota (only for localStorage)
                 const totalSize = storage.used - existingSize + newDataSize;
                 const quotaPercentage = (totalSize / storage.quota) * 100;
                 
                 if (quotaPercentage > 90) {
-                    showMessage(`Warning: Storage usage will be ${quotaPercentage.toFixed(1)}% after saving. Consider clearing old data or using smaller images.`, 'error');
-                    return false;
+                    console.log(`⚠️ localStorage nearly full (${quotaPercentage.toFixed(1)}%), but unlimited storage available`);
                 }
                 
-                // Save to localStorage first (immediate)
+                // Save to localStorage first (immediate access)
                 localStorage.setItem(existingKey, JSON.stringify(data));
                 console.log(`✅ ${dataType} saved to localStorage`);
                 
-                // Save to cloud storage (cross-device sync)
-                if (typeof saveToCloud === 'function') {
+                // Save to unlimited storage (cross-device sync, no limits)
+                if (typeof saveToUnlimited === 'function') {
                     try {
-                        await saveToCloud(dataType, data);
-                        console.log(`☁️ ${dataType} saved to cloud storage`);
-                        showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved successfully! Changes will sync across all devices.`, 'success');
+                        const success = await saveToUnlimited(dataType, data);
+                        if (success) {
+                            console.log(`🔥 ${dataType} saved to unlimited storage`);
+                            showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved successfully! Changes sync across all devices with unlimited storage.`, 'success');
+                        } else {
+                            console.log(`⚠️ Unlimited storage failed, but local save worked`);
+                            showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved locally! Unlimited sync unavailable.`, 'success');
+                        }
                     } catch (error) {
-                        console.log(`⚠️ Cloud save failed, but local save worked:`, error);
+                        console.log(`⚠️ Unlimited storage failed, but local save worked:`, error);
                         showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved locally! Cloud sync unavailable.`, 'success');
                     }
                 } else {
@@ -1926,7 +1930,7 @@
         });
     </script>
     
-    <!-- Cloud Storage for Online Saving -->
-    <script src="../js/cloud-storage.js"></script>
+    <!-- Unlimited Storage for Online Saving -->
+    <script src="../js/firebase-storage.js"></script>
 </body>
 </html>
