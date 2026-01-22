@@ -212,6 +212,34 @@
     <!-- Decap CMS will render here -->
     <div id="cms-root"></div>
     
+    <!-- Fallback Admin Interface -->
+    <div id="fallback-admin" style="display: none; padding: 2rem; max-width: 800px; margin: 0 auto;">
+        <div class="admin-welcome">
+            <h2>🚀 Portfolio Admin Dashboard</h2>
+            <p><strong>⚠️ Decap CMS failed to load. Using fallback interface.</strong></p>
+            <p>Please check your browser console for errors and ensure:</p>
+            <ul style="text-align: left; max-width: 400px; margin: 1rem auto;">
+                <li>✅ Netlify Identity is enabled</li>
+                <li>✅ GitHub repository is correctly configured</li>
+                <li>✅ You have admin permissions</li>
+                <li>✅ JavaScript is enabled</li>
+            </ul>
+            <div style="margin-top: 2rem;">
+                <h3>📁 Manual Content Management</h3>
+                <p>While CMS is unavailable, you can:</p>
+                <ul style="text-align: left; max-width: 400px; margin: 1rem auto;">
+                    <li>📝 Edit files directly in GitHub</li>
+                    <li>📁 Upload images via GitHub web interface</li>
+                    <li>🔄 Changes will auto-deploy to Netlify</li>
+                </ul>
+                <a href="https://github.com/RajinShahriar10/rajin" target="_blank" class="btn btn-primary" style="display: inline-block; margin-top: 1rem;">
+                    <span>Open Repository on GitHub</span>
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
     <script>
         // Show loading initially
         document.getElementById('admin-loading').style.display = 'flex';
@@ -220,12 +248,12 @@
         window.CMS_CONFIG = {
             backend: {
                 name: 'github',
-                repo: 'your-username/your-repo', // ⚠️ UPDATE THIS
+                repo: 'RajinShahriar10/rajin',
                 branch: 'main',
                 api_root: 'https://api.github.com',
-                site_domain: 'your-site.netlify.app', // ⚠️ UPDATE THIS
+                site_domain: 'rajinshahriar.netlify.app',
                 base_url: 'https://api.netlify.com',
-                auth_endpoint: 'https://your-site.netlify.app/.netlify/identity', // ⚠️ UPDATE THIS
+                auth_endpoint: 'https://rajinshahriar.netlify.app/.netlify/identity',
                 auth_type: 'pkce',
             },
             media_folder: 'assets/images',
@@ -539,9 +567,19 @@
             if (e.message.includes('CMS') || e.message.includes('decap')) {
                 console.error('❌ CMS Error:', e.message);
                 document.getElementById('admin-loading').style.display = 'none';
-                document.getElementById('admin-welcome').style.display = 'block';
+                document.getElementById('fallback-admin').style.display = 'block';
             }
         });
+        
+        // Timeout fallback - show fallback if CMS doesn't load in 10 seconds
+        setTimeout(() => {
+            const cmsRoot = document.getElementById('cms-root');
+            if (cmsRoot && cmsRoot.children.length === 0) {
+                console.warn('⚠️ CMS failed to load, showing fallback');
+                document.getElementById('admin-loading').style.display = 'none';
+                document.getElementById('fallback-admin').style.display = 'block';
+            }
+        }, 10000);
     </script>
 </body>
 </html>
