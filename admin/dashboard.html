@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Portfolio Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../js/dynamic-loader.js"></script>
+    <script src="../js/cloud-storage.js"></script>
     <script src="data-manager.js"></script>
     <style>
         :root {
@@ -1623,15 +1625,26 @@
                     return false;
                 }
                 
-                // Save to localStorage
+                // Save to localStorage first (immediate)
                 localStorage.setItem(existingKey, JSON.stringify(data));
                 console.log(`✅ ${dataType} saved to localStorage`);
                 
+                // Save to cloud storage (cross-device sync)
+                if (typeof saveToCloud === 'function') {
+                    try {
+                        await saveToCloud(dataType, data);
+                        console.log(`☁️ ${dataType} saved to cloud storage`);
+                        showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved successfully! Changes will sync across all devices.`, 'success');
+                    } catch (error) {
+                        console.log(`⚠️ Cloud save failed, but local save worked:`, error);
+                        showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved locally! Cloud sync unavailable.`, 'success');
+                    }
+                } else {
+                    showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved successfully! Changes saved locally.`, 'success');
+                }
+                
                 // Trigger cross-device sync notification
                 notifyCrossDeviceUpdate();
-                
-                // Show success message
-                showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved successfully! Changes will sync across all devices.`, 'success');
                 
                 return true;
             } catch (error) {
@@ -1912,5 +1925,8 @@
             closeSkillModal();
         });
     </script>
+    
+    <!-- Cloud Storage for Online Saving -->
+    <script src="../js/cloud-storage.js"></script>
 </body>
 </html>
