@@ -1447,7 +1447,10 @@
             };
 
             await saveData('about', aboutData);
-            showMessage('About section saved successfully! Changes will appear on the website after refresh.', 'success');
+            showMessage('About section saved successfully! Changes will appear on all devices.', 'success');
+            
+            // Trigger cross-device sync
+            notifyCrossDeviceUpdate();
         }
 
         async function saveData(dataType, data) {
@@ -1460,30 +1463,86 @@
                 const existingData = localStorage.getItem(existingKey);
                 const existingSize = existingData ? existingData.length : 0;
                 
-                // Calculate new data size (difference, not total)
+                // Calculate new data size
                 const newDataSize = JSON.stringify(data).length;
-                const sizeDifference = newDataSize - existingSize;
-                const estimatedNewSize = (storage.usedKB * 1024) + sizeDifference;
-                const estimatedMB = estimatedNewSize / (1024 * 1024);
                 
-                // Only check quota if we're adding data (not updating)
-                if (sizeDifference > 0 && estimatedMB > 4.5) {
-                    throw new Error(`Storage quota would be exceeded. Current: ${storage.usedMB}MB, New would be: ${estimatedMB.toFixed(2)}MB. Please clear old data or use smaller images.`);
+                // Check if we're approaching quota
+                const totalSize = storage.used - existingSize + newDataSize;
+                const quotaPercentage = (totalSize / storage.quota) * 100;
+                
+                if (quotaPercentage > 90) {
+                    showMessage(`Warning: Storage usage will be ${quotaPercentage.toFixed(1)}% after saving. Consider clearing old data or using smaller images.`, 'error');
+                    return false;
                 }
                 
                 // Save to localStorage
                 localStorage.setItem(existingKey, JSON.stringify(data));
-                console.log(`✅ ${dataType} saved to localStorage (${sizeDifference > 0 ? '+' : ''}${(sizeDifference/1024).toFixed(1)}KB)`);
+                console.log(`✅ ${dataType} saved to localStorage`);
                 
-                // Try to save to DataManager if available
-                if (dataManager) {
-                    await dataManager.saveData(dataType, data);
-                }
+                // Trigger cross-device sync notification
+                notifyCrossDeviceUpdate();
                 
-                showMessage(`${dataType} saved successfully! Changes will appear on the website after refresh.`, 'success');
+                // Show success message
+                showMessage(`${dataType.charAt(0).toUpperCase() + dataType.slice(1)} saved successfully! Changes will sync across all devices.`, 'success');
+                
+                return true;
             } catch (error) {
-                console.error('Save error:', error);
-                showMessage('Failed to save: ' + error.message, 'error');
+                console.error('Failed to save data:', error);
+                showMessage('Failed to save data. Please try again.', 'error');
+                return false;
+            }
+        }
+
+        // Cross-device sync notification
+        function notifyCrossDeviceUpdate() {
+            console.log('📢 Triggering cross-device sync notification...');
+            
+            // Set update timestamp
+            localStorage.setItem('adminUpdateTime', Date.now().toString());
+            
+            // Try to notify all open tabs/windows
+            if (typeof Storage !== 'undefined') {
+                // Use storage event to notify other tabs
+                window.dispatchEvent(new StorageEvent('storage', {
+                    key: 'adminUpdateTime',
+                    newValue: Date.now().toString(),
+                    oldValue: localStorage.getItem('adminUpdateTime')
+                }));
+            }
+            
+            // Also try to notify parent window if in iframe
+            if (window.parent && window.parent !== window) {
+                try {
+                    window.parent.postMessage({
+                        type: 'portfolioUpdate',
+                        timestamp: Date.now()
+                    }, '*');
+                } catch (e) {
+                    console.log('Could not notify parent window:', e);
+                }
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            checkAuth();
+            try {
+                dataManager = new DataManager();
+                await loadData();
+                renderProjects();
+                renderSkills();
+                loadSettings();
+                loadAboutData();
+            } catch (error) {
+                console.error('Failed to initialize DataManager:', error);
+                // Fallback to localStorage
+                initLocalStorage();
+            }
+        });
+
+        function checkAuth() {
+            if (sessionStorage.getItem('adminLoggedIn') !== 'true') {
+                window.location.href = 'auth.html';
             }
         }
 
