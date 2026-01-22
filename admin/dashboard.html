@@ -1500,6 +1500,14 @@
             // Set update timestamp
             localStorage.setItem('adminUpdateTime', Date.now().toString());
             
+            // Trigger dynamic loader refresh on all devices
+            setTimeout(() => {
+                if (typeof refreshWebsiteData === 'function') {
+                    refreshWebsiteData('all');
+                    console.log('🔄 Dynamic loader refresh triggered');
+                }
+            }, 500);
+            
             // Try to notify all open tabs/windows
             if (typeof Storage !== 'undefined') {
                 // Use storage event to notify other tabs
