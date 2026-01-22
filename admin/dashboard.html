@@ -4,10 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Portfolio Management</title>
-    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="data-manager.js"></script>
     <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --transition-fast: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             background: var(--bg-primary);
             color: var(--text-primary);
@@ -15,6 +34,7 @@
             margin: 0;
             padding: 1rem;
             min-height: 100vh;
+            line-height: 1.6;
         }
         
         .admin-header {
@@ -53,6 +73,7 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-size: 0.875rem;
         }
         
         .btn-logout:hover {
@@ -74,6 +95,7 @@
             cursor: pointer;
             border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
+            font-size: 0.875rem;
         }
         
         .tab-btn.active {
@@ -103,6 +125,7 @@
         .section-header h2 {
             margin: 0;
             color: var(--text-primary);
+            font-size: 1.5rem;
         }
         
         .btn-add {
@@ -117,6 +140,8 @@
             align-items: center;
             gap: 0.5rem;
             transition: all 0.3s ease;
+            font-size: 0.875rem;
+            font-weight: 600;
         }
         
         .btn-add:hover {
@@ -196,6 +221,7 @@
             text-decoration: none;
             font-size: 0.875rem;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
         
         .btn-edit {
@@ -234,8 +260,7 @@
         }
         
         .modal-content {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
+            background: var(--bg-secondary);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 2rem;
@@ -255,6 +280,7 @@
         .modal-header h3 {
             margin: 0;
             color: var(--text-primary);
+            font-size: 1.25rem;
         }
         
         .btn-close {
@@ -263,6 +289,14 @@
             color: var(--text-secondary);
             font-size: 1.5rem;
             cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-close:hover {
+            color: var(--text-primary);
+            background: var(--glass-bg);
         }
         
         .form-group {
@@ -299,7 +333,7 @@
         .form-group select:focus {
             outline: none;
             border-color: var(--accent-cyan);
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
         }
         
         .tech-input-group {
@@ -319,6 +353,11 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-add-tech:hover {
+            background: #0891b2;
         }
         
         .form-actions {
@@ -353,6 +392,10 @@
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
         
+        .btn-cancel:hover {
+            background: var(--bg-tertiary);
+        }
+        
         .success-message {
             position: fixed;
             top: 20px;
@@ -364,6 +407,32 @@
             z-index: 10000;
             max-width: 300px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+        }
+        
+        .error-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            z-index: 10000;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
         
         @media (max-width: 768px) {
@@ -379,6 +448,11 @@
             
             .projects-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
             }
         }
     </style>
@@ -418,6 +492,7 @@
         </div>
         <div id="projects-grid" class="projects-grid">
             <!-- Projects will be loaded here -->
+            <div class="loading">Loading projects...</div>
         </div>
     </div>
 
@@ -431,6 +506,7 @@
         </div>
         <div id="skills-grid" class="projects-grid">
             <!-- Skills will be loaded here -->
+            <div class="loading">Loading skills...</div>
         </div>
     </div>
 
@@ -497,7 +573,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="projectImage">Project Image</label>
+                    <label for="projectImage">Project Image URL</label>
                     <input type="url" id="projectImage" name="projectImage" placeholder="https://example.com/image.jpg">
                 </div>
                 
@@ -599,11 +675,17 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
             checkAuth();
-            dataManager = new DataManager();
-            await loadData();
-            renderProjects();
-            renderSkills();
-            loadSettings();
+            try {
+                dataManager = new DataManager();
+                await loadData();
+                renderProjects();
+                renderSkills();
+                loadSettings();
+            } catch (error) {
+                console.error('Failed to initialize DataManager:', error);
+                // Fallback to localStorage
+                initLocalStorage();
+            }
         });
 
         function checkAuth() {
@@ -618,15 +700,54 @@
             window.location.href = 'auth.html';
         }
 
-        async loadData() {
+        // Fallback to localStorage if DataManager fails
+        function initLocalStorage() {
+            projects = JSON.parse(localStorage.getItem('portfolioProjects')) || [
+                {
+                    id: 1,
+                    title: "E-Commerce Platform",
+                    description: "A modern e-commerce platform built with React and Node.js",
+                    image: "https://via.placeholder.com/400x200/667eea/ffffff?text=E-Commerce",
+                    technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+                    liveUrl: "https://example-ecommerce.com",
+                    githubUrl: "https://github.com/example/ecommerce"
+                }
+            ];
+            
+            skills = JSON.parse(localStorage.getItem('portfolioSkills')) || [
+                {
+                    id: 1,
+                    name: "JavaScript",
+                    icon: "fab fa-js",
+                    level: 88,
+                    color: "#F7DF1E",
+                    category: "Frontend"
+                }
+            ];
+            
+            settings = JSON.parse(localStorage.getItem('portfolioSettings')) || {
+                siteTitle: "Web Developer Portfolio",
+                siteDescription: "Professional web developer portfolio",
+                authorName: "Web Developer",
+                email: "hello@example.com",
+                phone: "+1 (555) 123-4567",
+                location: "San Francisco, CA"
+            };
+            
+            renderProjects();
+            renderSkills();
+            loadSettings();
+        }
+
+        async function loadData() {
             try {
                 projects = await dataManager.loadData('projects');
                 skills = await dataManager.loadData('skills');
                 settings = await dataManager.loadData('settings');
-                console.log('✅ Data loaded successfully');
+                console.log('✅ Data loaded from DataManager');
             } catch (error) {
-                console.error('❌ Failed to load data:', error);
-                showMessage('Failed to load data: ' + error.message, 'error');
+                console.error('❌ Failed to load data from DataManager:', error);
+                throw error;
             }
         }
 
@@ -646,17 +767,24 @@
 
         function renderProjects() {
             const grid = document.getElementById('projects-grid');
+            if (!grid) return;
+            
             grid.innerHTML = '';
+            
+            if (projects.length === 0) {
+                grid.innerHTML = '<div class="project-card"><p>No projects yet. Click "Add New Project" to get started!</p></div>';
+                return;
+            }
             
             projects.forEach(project => {
                 const card = document.createElement('div');
                 card.className = 'project-card';
                 card.innerHTML = `
-                    <img src="${project.image}" alt="${project.title}" class="project-image">
+                    <img src="${project.image || 'https://via.placeholder.com/400x200/667eea/ffffff?text=No+Image'}" alt="${project.title}" class="project-image">
                     <h3 class="project-title">${project.title}</h3>
                     <p class="project-description">${project.description}</p>
                     <div class="project-tech">
-                        ${project.technologies.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
+                        ${(project.technologies || []).map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
                     </div>
                     <div class="project-actions">
                         <button class="btn-edit" onclick="editProject(${project.id})">
@@ -673,7 +801,14 @@
 
         function renderSkills() {
             const grid = document.getElementById('skills-grid');
+            if (!grid) return;
+            
             grid.innerHTML = '';
+            
+            if (skills.length === 0) {
+                grid.innerHTML = '<div class="project-card"><p>No skills yet. Click "Add New Skill" to get started!</p></div>';
+                return;
+            }
             
             skills.forEach(skill => {
                 const card = document.createElement('div');
@@ -699,12 +834,19 @@
         }
 
         function loadSettings() {
-            document.getElementById('siteTitle').value = settings.siteTitle || 'Web Developer Portfolio';
-            document.getElementById('siteDescription').value = settings.siteDescription || 'Professional web developer portfolio';
-            document.getElementById('authorName').value = settings.authorName || 'Web Developer';
-            document.getElementById('email').value = settings.email || 'hello@example.com';
-            document.getElementById('phone').value = settings.phone || '+1 (555) 123-4567';
-            document.getElementById('location').value = settings.location || 'San Francisco, CA';
+            const siteTitle = document.getElementById('siteTitle');
+            const siteDescription = document.getElementById('siteDescription');
+            const authorName = document.getElementById('authorName');
+            const email = document.getElementById('email');
+            const phone = document.getElementById('phone');
+            const location = document.getElementById('location');
+            
+            if (siteTitle) siteTitle.value = settings.siteTitle || 'Web Developer Portfolio';
+            if (siteDescription) siteDescription.value = settings.siteDescription || 'Professional web developer portfolio';
+            if (authorName) authorName.value = settings.authorName || 'Web Developer';
+            if (email) email.value = settings.email || 'hello@example.com';
+            if (phone) phone.value = settings.phone || '+1 (555) 123-4567';
+            if (location) location.value = settings.location || 'San Francisco, CA';
         }
 
         // Project Modal Functions
@@ -714,25 +856,37 @@
             
             if (projectId) {
                 const project = projects.find(p => p.id === projectId);
+                if (!project) return;
+                
                 document.getElementById('projectModalTitle').textContent = 'Edit Project';
                 document.getElementById('projectId').value = project.id;
-                document.getElementById('projectTitle').value = project.title;
-                document.getElementById('projectDescription').value = project.description;
-                document.getElementById('projectImage').value = project.image;
-                document.getElementById('projectLiveUrl').value = project.liveUrl;
-                document.getElementById('projectGithubUrl').value = project.githubUrl;
+                document.getElementById('projectTitle').value = project.title || '';
+                document.getElementById('projectDescription').value = project.description || '';
+                document.getElementById('projectImage').value = project.image || '';
+                document.getElementById('projectLiveUrl').value = project.liveUrl || '';
+                document.getElementById('projectGithubUrl').value = project.githubUrl || '';
                 
                 // Load technologies
                 const techInputs = document.getElementById('techInputs');
                 techInputs.innerHTML = '';
-                project.technologies.forEach(tech => {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.value = tech;
-                    input.className = 'tech-input';
-                    input.style.marginBottom = '0.5rem';
-                    techInputs.appendChild(input);
-                });
+                if (project.technologies && project.technologies.length > 0) {
+                    project.technologies.forEach(tech => {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.value = tech;
+                        input.className = 'tech-input';
+                        input.style.marginBottom = '0.5rem';
+                        techInputs.appendChild(input);
+                    });
+                }
+                
+                // Add empty input for new technologies
+                const newInput = document.createElement('input');
+                newInput.type = 'text';
+                newInput.placeholder = 'Add technology';
+                newInput.className = 'tech-input';
+                newInput.style.marginBottom = '0.5rem';
+                techInputs.appendChild(newInput);
             } else {
                 document.getElementById('projectModalTitle').textContent = 'Add New Project';
                 form.reset();
@@ -764,13 +918,15 @@
             
             if (skillId) {
                 const skill = skills.find(s => s.id === skillId);
+                if (!skill) return;
+                
                 document.getElementById('skillModalTitle').textContent = 'Edit Skill';
                 document.getElementById('skillId').value = skill.id;
-                document.getElementById('skillName').value = skill.name;
-                document.getElementById('skillIcon').value = skill.icon;
-                document.getElementById('skillLevel').value = skill.level;
-                document.getElementById('skillColor').value = skill.color;
-                document.getElementById('skillCategory').value = skill.category;
+                document.getElementById('skillName').value = skill.name || '';
+                document.getElementById('skillIcon').value = skill.icon || '';
+                document.getElementById('skillLevel').value = skill.level || 0;
+                document.getElementById('skillColor').value = skill.color || '#667eea';
+                document.getElementById('skillCategory').value = skill.category || 'Other';
             } else {
                 document.getElementById('skillModalTitle').textContent = 'Add New Skill';
                 form.reset();
@@ -806,12 +962,18 @@
             };
             
             await saveData('settings', settings);
-            showMessage('Settings saved successfully! Changes will appear on the website after refresh.', 'success');
         }
 
         async function saveData(dataType, data) {
             try {
-                await dataManager.saveData(dataType, data);
+                // Save to localStorage first
+                localStorage.setItem(`portfolio${dataType.charAt(0).toUpperCase() + dataType.slice(1)}`, JSON.stringify(data));
+                
+                // Try to save to DataManager if available
+                if (dataManager) {
+                    await dataManager.saveData(dataType, data);
+                }
+                
                 showMessage(`${dataType} saved successfully! Changes will appear on the website after refresh.`, 'success');
             } catch (error) {
                 console.error('Save error:', error);
@@ -820,11 +982,12 @@
         }
 
         function showMessage(message, type) {
+            // Remove existing messages
+            const existingMessages = document.querySelectorAll('.success-message, .error-message');
+            existingMessages.forEach(msg => msg.remove());
+            
             const messageDiv = document.createElement('div');
-            messageDiv.className = 'success-message';
-            if (type === 'error') {
-                messageDiv.style.background = 'rgba(239, 68, 68, 0.9)';
-            }
+            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
             messageDiv.innerHTML = `
                 <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i> ${message}<br>
                 <small><a href="${window.location.origin}" target="_blank" style="color: white; text-decoration: underline;">View Website</a></small>
