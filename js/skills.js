@@ -14,16 +14,25 @@ class SkillsManager {
 
     async loadSkills() {
         try {
-            // Try to load from data file
-            const response = await fetch('content/skills/skills.json');
-            if (response.ok) {
-                this.skills = await response.json();
+            // First try to load from admin localStorage
+            const adminSkills = localStorage.getItem('portfolioSkills');
+            if (adminSkills) {
+                this.skills = JSON.parse(adminSkills);
+                console.log('💡 Loaded skills from admin panel:', this.skills.length);
             } else {
-                // Fallback to sample skills
-                this.skills = this.getSampleSkills();
+                // Fallback to data file
+                const response = await fetch('content/skills/skills.json');
+                if (response.ok) {
+                    this.skills = await response.json();
+                    console.log('📁 Loaded skills from JSON file');
+                } else {
+                    // Final fallback to sample skills
+                    this.skills = this.getSampleSkills();
+                    console.log('🔧 Using sample skills');
+                }
             }
         } catch (error) {
-            console.log('Using sample skills:', error);
+            console.log('⚠️ Using sample skills:', error);
             this.skills = this.getSampleSkills();
         }
         

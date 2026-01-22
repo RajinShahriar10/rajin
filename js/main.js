@@ -7,7 +7,82 @@ document.addEventListener('DOMContentLoaded', function() {
     initTechBackground();
     initSmoothScroll();
     initFloatingLogos();
+    loadSiteSettings();
 });
+
+// Load site settings from admin data
+function loadSiteSettings() {
+    try {
+        const adminSettings = localStorage.getItem('portfolioSettings');
+        if (adminSettings) {
+            const settings = JSON.parse(adminSettings);
+            console.log('⚙️ Loaded site settings from admin panel');
+            
+            // Update page title
+            if (settings.siteTitle) {
+                document.title = settings.siteTitle + ' - Modern & Professional';
+                document.querySelector('meta[property="og:title"]').content = settings.siteTitle;
+            }
+            
+            // Update meta description
+            if (settings.siteDescription) {
+                document.querySelector('meta[name="description"]').content = settings.siteDescription;
+                document.querySelector('meta[property="og:description"]').content = settings.siteDescription;
+            }
+            
+            // Update author
+            if (settings.authorName) {
+                document.querySelector('meta[name="author"]').content = settings.authorName;
+            }
+            
+            // Update hero section
+            const heroTitle = document.querySelector('.hero-title .gradient-text');
+            if (heroTitle && settings.heroTitle) {
+                heroTitle.textContent = settings.heroTitle;
+            }
+            
+            const heroSubtitle = document.querySelector('.hero-subtitle');
+            if (heroSubtitle && settings.heroSubtitle) {
+                heroSubtitle.textContent = settings.heroSubtitle;
+            }
+            
+            // Update footer copyright
+            const footerCopyright = document.querySelector('.footer-bottom p');
+            if (footerCopyright) {
+                footerCopyright.textContent = `© 2024 ${settings.siteTitle || 'Web Developer Portfolio'}. All rights reserved.`;
+            }
+            
+            // Update contact information
+            updateContactInfo(settings);
+        }
+    } catch (error) {
+        console.log('⚠️ Using default site settings:', error);
+    }
+}
+
+// Update contact information in the footer
+function updateContactInfo(settings) {
+    const contactInfo = document.querySelector('.contact-info');
+    if (contactInfo) {
+        const emailLink = contactInfo.querySelector('a[href^="mailto:"]');
+        const phoneLink = contactInfo.querySelector('a[href^="tel:"]');
+        const locationText = contactInfo.querySelector('.contact-item:nth-child(3) span');
+        
+        if (emailLink && settings.email) {
+            emailLink.href = `mailto:${settings.email}`;
+            emailLink.innerHTML = `<i class="fas fa-envelope"></i> ${settings.email}`;
+        }
+        
+        if (phoneLink && settings.phone) {
+            phoneLink.href = `tel:${settings.phone}`;
+            phoneLink.innerHTML = `<i class="fas fa-phone"></i> ${settings.phone}`;
+        }
+        
+        if (locationText && settings.location) {
+            locationText.textContent = settings.location;
+        }
+    }
+}
 
 // Navigation functionality
 function initNavigation() {

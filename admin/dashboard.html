@@ -981,7 +981,30 @@
             };
             
             localStorage.setItem('portfolioSettings', JSON.stringify(settings));
-            alert('Settings saved successfully!');
+            
+            // Show success message and offer to refresh website
+            const successMessage = document.createElement('div');
+            successMessage.className = 'success-message';
+            successMessage.innerHTML = `
+                <i class="fas fa-check-circle"></i> Settings saved successfully!<br>
+                <small>Changes will appear on the website after refresh.</small><br>
+                <button onclick="refreshWebsite()" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: var(--accent-cyan); color: var(--bg-primary); border: none; border-radius: 6px; cursor: pointer;">
+                    <i class="fas fa-sync"></i> Refresh Website
+                </button>
+            `;
+            
+            const form = document.getElementById('settingsForm');
+            form.appendChild(successMessage);
+            
+            setTimeout(() => {
+                successMessage.remove();
+            }, 5000);
+        }
+
+        function refreshWebsite() {
+            // Open website in new tab with refresh
+            const websiteUrl = window.location.origin;
+            window.open(websiteUrl, '_blank');
         }
 
         // Form Submissions
@@ -1016,6 +1039,9 @@
             localStorage.setItem('portfolioProjects', JSON.stringify(projects));
             renderProjects();
             closeProjectModal();
+            
+            // Show success message with refresh option
+            showSuccessMessage('Project saved successfully! Changes will appear on the website after refresh.');
         });
 
         document.getElementById('skillForm').addEventListener('submit', function(e) {
@@ -1040,7 +1066,37 @@
             localStorage.setItem('portfolioSkills', JSON.stringify(skills));
             renderSkills();
             closeSkillModal();
-        });
+            
+            // Show success message with refresh option
+            showSuccessMessage('Skill saved successfully! Changes will appear on the website after refresh.');
+        }
+
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(34, 197, 94, 0.9);
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                z-index: 10000;
+                max-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            successDiv.innerHTML = `
+                <i class="fas fa-check-circle"></i> ${message}<br>
+                <small><a href="${window.location.origin}" target="_blank" style="color: white; text-decoration: underline;">View Website</a></small>
+            `;
+            
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 4000);
+        }
 
         function addTechInput() {
             const techInputs = document.getElementById('techInputs');

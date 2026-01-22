@@ -19,16 +19,25 @@ class CinematicCarousel {
 
     async loadProjects() {
         try {
-            // Load projects from data file or API
-            const response = await fetch('content/projects/projects.json');
-            if (response.ok) {
-                this.projects = await response.json();
+            // First try to load from admin localStorage
+            const adminProjects = localStorage.getItem('portfolioProjects');
+            if (adminProjects) {
+                this.projects = JSON.parse(adminProjects);
+                console.log('📦 Loaded projects from admin panel:', this.projects.length);
             } else {
-                // Fallback to sample projects if file doesn't exist
-                this.projects = this.getSampleProjects();
+                // Fallback to data file
+                const response = await fetch('content/projects/projects.json');
+                if (response.ok) {
+                    this.projects = await response.json();
+                    console.log('📁 Loaded projects from JSON file');
+                } else {
+                    // Final fallback to sample projects
+                    this.projects = this.getSampleProjects();
+                    console.log('🔧 Using sample projects');
+                }
             }
         } catch (error) {
-            console.log('Using sample projects:', error);
+            console.log('⚠️ Using sample projects:', error);
             this.projects = this.getSampleProjects();
         }
         
