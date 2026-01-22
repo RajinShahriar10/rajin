@@ -509,6 +509,9 @@
     <div class="admin-header">
         <h1>🚀 Portfolio Admin Dashboard</h1>
         <div class="user-info">
+            <button class="btn-logout" onclick="setupGitHubSync()" style="background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan); margin-right: 0.5rem;">
+                <i class="fab fa-github"></i> Sync to GitHub
+            </button>
             <span><i class="fas fa-user"></i> <span id="currentUser">Admin</span></span>
             <button class="btn-logout" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> Logout
@@ -759,6 +762,15 @@
             sessionStorage.removeItem('adminLoggedIn');
             sessionStorage.removeItem('adminUsername');
             window.location.href = 'auth.html';
+        }
+
+        function setupGitHubSync() {
+            if (dataManager) {
+                dataManager.setupGitHubToken();
+                showMessage('GitHub sync setup complete! Your data will now sync to the cloud.', 'success');
+            } else {
+                showMessage('Please wait for the admin panel to fully load first.', 'error');
+            }
         }
 
         // Fallback to localStorage if DataManager fails

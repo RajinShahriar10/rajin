@@ -1,75 +1,79 @@
-// Data Manager - Handles saving/loading data to GitHub for persistence
+// Data Manager - Handles saving/loading data with localStorage (GitHub optional)
 class DataManager {
     constructor() {
-        this.githubToken = null;
+        this.githubToken = localStorage.getItem('github_token') || null;
         this.repo = 'RajinShahriar10/rajin';
         this.branch = 'main';
         this.init();
     }
 
     init() {
-        // Try to get GitHub token from localStorage or prompt user
-        this.githubToken = localStorage.getItem('github_token') || this.promptForToken();
+        // GitHub token is optional - work with localStorage by default
+        console.log('📦 DataManager initialized with localStorage support');
+        console.log('💡 GitHub sync available (optional)');
     }
 
-    promptForToken() {
-        const token = prompt('Please enter your GitHub Personal Access Token:\n\n' +
-            '1. Go to GitHub → Settings → Developer settings → Personal access tokens\n' +
-            '2. Generate new token (classic) with repo permissions\n' +
-            '3. Copy and paste the token here\n\n' +
-            'This token will be stored locally for future use.');
+    // Optional: Setup GitHub token for cloud sync
+    setupGitHubToken() {
+        const token = prompt('Optional: Enter GitHub Personal Access Token for cloud sync:\n\n' +
+            'This allows you to save data to your GitHub repository.\n' +
+            'Skip this to use only local storage.\n\n' +
+            'Get token: GitHub → Settings → Developer settings → Personal access tokens');
         
         if (token) {
             localStorage.setItem('github_token', token);
-            return token;
+            this.githubToken = token;
+            console.log('✅ GitHub token saved for cloud sync');
+        } else {
+            console.log('📦 Using localStorage only');
         }
-        return null;
     }
 
     async saveData(dataType, data) {
-        if (!this.githubToken) {
-            throw new Error('GitHub token required');
-        }
-
-        const filePath = `content/${dataType}/${dataType}.json`;
-        const content = JSON.stringify(data, null, 2);
+        // Always save to localStorage first
+        localStorage.setItem(`portfolio${dataType.charAt(0).toUpperCase() + dataType.slice(1)}`, JSON.stringify(data));
+        console.log(`✅ ${dataType} saved to localStorage`);
         
-        try {
-            // Get current file info
-            const currentFile = await this.getFile(filePath);
-            const sha = currentFile ? currentFile.sha : null;
-            
-            // Update or create file
-            const response = await fetch(`https://api.github.com/repos/${this.repo}/contents/${filePath}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${this.githubToken}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    message: `Update ${dataType} data via admin panel`,
-                    content: btoa(unescape(encodeURIComponent(content))),
-                    sha: sha,
-                    branch: this.branch
-                })
-            });
+        // Optional: Try to save to GitHub if token exists
+        if (this.githubToken) {
+            try {
+                const filePath = `content/${dataType}/${dataType}.json`;
+                const content = JSON.stringify(data, null, 2);
+                
+                // Get current file info
+                const currentFile = await this.getFile(filePath);
+                const sha = currentFile ? currentFile.sha : null;
+                
+                // Update or create file
+                const response = await fetch(`https://api.github.com/repos/${this.repo}/contents/${filePath}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${this.githubToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: `Update ${dataType} data via admin panel`,
+                        content: btoa(unescape(encodeURIComponent(content))),
+                        sha: sha,
+                        branch: this.branch
+                    })
+                });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(`GitHub API Error: ${error.message}`);
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(`GitHub API Error: ${error.message}`);
+                }
+
+                const result = await response.json();
+                console.log(`☁️ ${dataType} also saved to GitHub:`, result);
+                return result;
+            } catch (error) {
+                console.warn(`⚠️ GitHub sync failed, but data saved locally:`, error);
+                // Don't throw error - localStorage save was successful
             }
-
-            const result = await response.json();
-            console.log(`✅ ${dataType} saved to GitHub:`, result);
-            
-            // Also save to localStorage as backup
-            localStorage.setItem(`portfolio${dataType.charAt(0).toUpperCase() + dataType.slice(1)}`, JSON.stringify(data));
-            
-            return result;
-        } catch (error) {
-            console.error(`❌ Failed to save ${dataType}:`, error);
-            throw error;
         }
+        
+        return { success: true, storage: 'localStorage' };
     }
 
     async loadData(dataType) {
