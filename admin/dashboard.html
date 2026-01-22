@@ -803,11 +803,16 @@
             const maxMB = 5; // Typical localStorage limit
             const percentage = ((total / (maxMB * 1024 * 1024)) * 100).toFixed(1);
             
-            console.log(`📊 Storage Usage: ${usedKB} KB (${usedMB} MB) - ${percentage}% of ${maxMB}MB limit`);
-            
-            if (percentage > 80) {
-                showMessage(`⚠️ Storage almost full (${percentage}%). Consider clearing old data or using smaller images.`, 'error');
+            // Show user-friendly message
+            if (percentage < 50) {
+                showMessage(`✅ Storage: ${usedMB}MB used (${percentage}% of ${maxMB}MB limit) - Plenty of space available`, 'success');
+            } else if (percentage < 80) {
+                showMessage(`⚠️ Storage: ${usedMB}MB used (${percentage}% of ${maxMB}MB limit) - Getting full`, 'error');
+            } else {
+                showMessage(`🚨 Storage: ${usedMB}MB used (${percentage}% of ${maxMB}MB limit) - Nearly full! Consider clearing old data`, 'error');
             }
+            
+            console.log(`📊 Storage Usage: ${usedKB} KB (${usedMB} MB) - ${percentage}% of ${maxMB}MB limit`);
             
             return { usedKB, usedMB, percentage, maxMB };
         }
@@ -1098,18 +1103,25 @@
                 // Check storage usage before saving
                 const storage = checkStorageUsage();
                 
-                // Estimate new data size
-                const dataSize = JSON.stringify(data).length;
-                const estimatedNewSize = (storage.usedKB * 1024) + dataSize;
+                // Get existing data to compare sizes
+                const existingKey = `portfolio${dataType.charAt(0).toUpperCase() + dataType.slice(1)}`;
+                const existingData = localStorage.getItem(existingKey);
+                const existingSize = existingData ? existingData.length : 0;
+                
+                // Calculate new data size (difference, not total)
+                const newDataSize = JSON.stringify(data).length;
+                const sizeDifference = newDataSize - existingSize;
+                const estimatedNewSize = (storage.usedKB * 1024) + sizeDifference;
                 const estimatedMB = estimatedNewSize / (1024 * 1024);
                 
-                if (estimatedMB > 4.5) { // Leave some buffer
+                // Only check quota if we're adding data (not updating)
+                if (sizeDifference > 0 && estimatedMB > 4.5) {
                     throw new Error(`Storage quota would be exceeded. Current: ${storage.usedMB}MB, New would be: ${estimatedMB.toFixed(2)}MB. Please clear old data or use smaller images.`);
                 }
                 
                 // Save to localStorage
-                localStorage.setItem(`portfolio${dataType.charAt(0).toUpperCase() + dataType.slice(1)}`, JSON.stringify(data));
-                console.log(`✅ ${dataType} saved to localStorage`);
+                localStorage.setItem(existingKey, JSON.stringify(data));
+                console.log(`✅ ${dataType} saved to localStorage (${sizeDifference > 0 ? '+' : ''}${(sizeDifference/1024).toFixed(1)}KB)`);
                 
                 // Try to save to DataManager if available
                 if (dataManager) {
