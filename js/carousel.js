@@ -26,39 +26,66 @@ class CinematicCarousel {
         console.log('🔄 Starting to load projects...');
         
         try {
-            // First try to load from admin localStorage ( DataManager compatible)
-            const adminProjects = localStorage.getItem('portfolioProjects');
-            console.log('📦 Checking localStorage for projects:', adminProjects ? 'Found' : 'Not found');
-            
-            if (adminProjects) {
-                try {
-                    this.projects = JSON.parse(adminProjects);
-                    console.log('✅ Successfully loaded projects from admin panel:', this.projects.length);
-                    
-                    // Validate projects data
-                    if (!Array.isArray(this.projects) || this.projects.length === 0) {
-                        console.log('⚠️ Invalid projects data, using fallback');
-                        this.projects = this.getSampleProjects();
+            // First try to load from JSON file (works across all devices)
+            console.log('📁 Loading from JSON file first...');
+            const response = await fetch('content/projects/projects.json');
+            if (response.ok) {
+                this.projects = await response.json();
+                console.log('✅ Successfully loaded projects from JSON file:', this.projects.length);
+                
+                // Check if admin has newer data in localStorage
+                const adminProjects = localStorage.getItem('portfolioProjects');
+                if (adminProjects) {
+                    try {
+                        const adminData = JSON.parse(adminProjects);
+                        console.log('📦 Admin data found, comparing...');
+                        
+                        // If admin data has more items, use that instead
+                        if (Array.isArray(adminData) && adminData.length > this.projects.length) {
+                            this.projects = adminData;
+                            console.log('🔄 Using admin data (more recent):', this.projects.length);
+                        }
+                    } catch (parseError) {
+                        console.log('⚠️ Admin data corrupted, using JSON file');
                     }
-                } catch (parseError) {
-                    console.log('❌ Failed to parse projects data:', parseError);
-                    this.projects = this.getSampleProjects();
                 }
             } else {
-                console.log('📁 No admin projects found, trying JSON file...');
-                // Try to load from data file
-                const response = await fetch('content/projects/projects.json');
-                if (response.ok) {
-                    this.projects = await response.json();
-                    console.log('✅ Loaded projects from JSON file:', this.projects.length);
+                console.log('❌ JSON file failed, trying localStorage...');
+                // Fallback to localStorage
+                const adminProjects = localStorage.getItem('portfolioProjects');
+                if (adminProjects) {
+                    try {
+                        this.projects = JSON.parse(adminProjects);
+                        console.log('✅ Loaded projects from localStorage:', this.projects.length);
+                    } catch (parseError) {
+                        console.log('❌ Failed to parse localStorage, using samples');
+                        this.projects = this.getSampleProjects();
+                    }
                 } else {
                     // Final fallback to sample projects
                     this.projects = this.getSampleProjects();
-                    console.log('🔧 Using sample projects (JSON fetch failed)');
+                    console.log('🔧 Using sample projects');
                 }
             }
         } catch (error) {
             console.log('❌ Error loading projects:', error);
+            // Try localStorage as fallback
+            const adminProjects = localStorage.getItem('portfolioProjects');
+            if (adminProjects) {
+                try {
+                    this.projects = JSON.parse(adminProjects);
+                    console.log('✅ Fallback to localStorage worked:', this.projects.length);
+                } catch (parseError) {
+                    this.projects = this.getSampleProjects();
+                }
+            } else {
+                this.projects = this.getSampleProjects();
+            }
+        }
+        
+        // Validate projects data
+        if (!Array.isArray(this.projects) || this.projects.length === 0) {
+            console.log('⚠️ Invalid projects data, using fallback');
             this.projects = this.getSampleProjects();
         }
         

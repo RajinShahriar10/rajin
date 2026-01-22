@@ -34,6 +34,11 @@ class DataManager {
         localStorage.setItem(`portfolio${dataType.charAt(0).toUpperCase() + dataType.slice(1)}`, JSON.stringify(data));
         console.log(`✅ ${dataType} saved to localStorage`);
         
+        // For projects, also try to save to JSON file via GitHub
+        if (dataType === 'projects') {
+            await this.saveProjectsToJSON(data);
+        }
+        
         // Optional: Try to save to GitHub if token exists
         if (this.githubToken) {
             try {
@@ -191,6 +196,55 @@ class DataManager {
             };
         }
         return [];
+    }
+
+    async saveProjectsToJSON(projects) {
+        try {
+            console.log('💾 Saving projects to JSON file for cross-device sync...');
+            
+            // Create the JSON content
+            const jsonContent = JSON.stringify(projects, null, 2);
+            
+            // Try to save via GitHub API (even without token for public repos)
+            const response = await fetch(`https://api.github.com/repos/${this.repo}/contents/content/projects/projects.json`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': this.githubToken ? `token ${this.githubToken}` : '',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: 'Update projects from admin panel',
+                    content: btoa(unescape(encodeURIComponent(jsonContent))),
+                    sha: await this.getFileSHA('content/projects/projects.json')
+                })
+            });
+            
+            if (response.ok) {
+                console.log('✅ Projects saved to JSON file - will sync across devices!');
+            } else {
+                console.log('⚠️ Could not save to JSON file (need GitHub token)');
+            }
+        } catch (error) {
+            console.log('❌ Error saving projects to JSON:', error);
+        }
+    }
+
+    async getFileSHA(filePath) {
+        try {
+            const response = await fetch(`https://api.github.com/repos/${this.repo}/contents/${filePath}`, {
+                headers: {
+                    'Authorization': this.githubToken ? `token ${this.githubToken}` : '',
+                }
+            });
+            
+            if (response.ok) {
+                const file = await response.json();
+                return file.sha;
+            }
+        } catch (error) {
+            console.log('Could not get file SHA:', error);
+        }
+        return null;
     }
 
     async uploadImage(file) {
