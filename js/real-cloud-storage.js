@@ -49,11 +49,17 @@ class RealCloudStorage {
 
     async saveToGitHub(dataType, data) {
         try {
+            console.log(`🌐 Attempting to save ${dataType} to GitHub...`);
+            console.log(`📝 Repository: ${this.repo}`);
+            console.log(`🔑 Token available: ${!!this.githubToken}`);
+            
             const filePath = `content/${dataType}/${dataType}.json`;
             const content = JSON.stringify(data, null, 2);
+            console.log(`📁 File path: ${filePath}`);
             
             // Get current file info
             const sha = await this.getFileSHA(filePath);
+            console.log(`🔍 File SHA: ${sha || 'new file'}`);
             
             // Update or create file
             const response = await fetch(`https://api.github.com/repos/${this.repo}/contents/${filePath}`, {
@@ -70,6 +76,8 @@ class RealCloudStorage {
                 })
             });
 
+            console.log(`📡 GitHub API Response Status: ${response.status}`);
+            
             if (response.ok) {
                 const result = await response.json();
                 console.log(`✅ ${dataType} saved to GitHub:`, result.content.html_url);
@@ -81,11 +89,13 @@ class RealCloudStorage {
             } else {
                 const error = await response.json();
                 console.log(`❌ GitHub API Error:`, error);
+                console.log(`❌ Error details:`, error.message);
                 return false;
             }
             
         } catch (error) {
             console.log(`❌ Error saving to GitHub:`, error);
+            console.log(`❌ Error stack:`, error.stack);
             return false;
         }
     }
