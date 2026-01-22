@@ -952,11 +952,30 @@
         }
 
         function setupGitHubSync() {
-            if (dataManager) {
-                dataManager.setupGitHubToken();
-                showMessage('GitHub sync setup complete! Your data will now sync to the cloud.', 'success');
-            } else {
-                showMessage('Please wait for the admin panel to fully load first.', 'error');
+            const token = prompt('Enter your GitHub Personal Access Token for online saving:\n\n' +
+                'This allows your admin panel to save changes directly to GitHub.\n' +
+                'Your website will update automatically when you save projects.\n\n' +
+                'Get token: GitHub → Settings → Developer settings → Personal access tokens → Generate new token (classic)\n' +
+                'Required scope: repo (Full control of private repositories)');
+            
+            if (token && token.trim() !== '') {
+                // Save token to localStorage
+                localStorage.setItem('github_token', token.trim());
+                
+                // Update real cloud storage with token
+                if (typeof setupGitHubToken === 'function') {
+                    setupGitHubToken(token.trim());
+                }
+                
+                // Update data manager too (for compatibility)
+                if (dataManager) {
+                    dataManager.githubToken = token.trim();
+                }
+                
+                showMessage('✅ GitHub token saved! Your admin panel will now save changes online and update the website automatically.', 'success');
+                console.log('🌐 GitHub sync enabled - admin panel will save to GitHub');
+            } else if (token !== null) {
+                showMessage('⚠️ Please enter a valid GitHub token to enable online saving.', 'error');
             }
         }
 
