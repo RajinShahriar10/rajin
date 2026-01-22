@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Portfolio Management</title>
+    
+    <!-- Decap CMS -->
+    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.css" />
+    <link rel="stylesheet" href="../css/style.css">
+    
+    <style>
+        /* Admin-specific styles */
+        body {
+            background: var(--bg-primary) !important;
+            color: var(--text-primary) !important;
+            font-family: var(--font-family) !important;
+        }
+        
+        .cms-wrapper {
+            background: var(--bg-primary) !important;
+            min-height: 100vh;
+        }
+        
+        .cms-sidebar {
+            background: var(--bg-secondary) !important;
+            border-right: 1px solid var(--glass-border) !important;
+        }
+        
+        .cms-main {
+            background: var(--bg-primary) !important;
+        }
+        
+        .cms-card {
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 15px !important;
+        }
+        
+        .cms-button-primary {
+            background: var(--primary-gradient) !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .cms-button-primary:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+        }
+        
+        .cms-input, .cms-textarea, .cms-select {
+            background: var(--bg-tertiary) !important;
+            border: 1px solid var(--glass-border) !important;
+            color: var(--text-primary) !important;
+            border-radius: 8px !important;
+            padding: 12px !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .cms-input:focus, .cms-textarea:focus, .cms-select:focus {
+            border-color: var(--accent-cyan) !important;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3) !important;
+            outline: none !important;
+        }
+        
+        .cms-label {
+            color: var(--text-primary) !important;
+            font-weight: 600 !important;
+            margin-bottom: 8px !important;
+        }
+        
+        .cms-text-secondary {
+            color: var(--text-secondary) !important;
+        }
+        
+        .cms-header {
+            background: var(--bg-secondary) !important;
+            border-bottom: 1px solid var(--glass-border) !important;
+        }
+        
+        .cms-header h1 {
+            color: var(--text-primary) !important;
+            font-weight: 700 !important;
+        }
+        
+        .cms-collection-item {
+            background: var(--glass-bg) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 12px !important;
+            margin-bottom: 16px !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .cms-collection-item:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2) !important;
+        }
+        
+        .cms-collection-item-title {
+            color: var(--text-primary) !important;
+            font-weight: 600 !important;
+        }
+        
+        .cms-collection-item-description {
+            color: var(--text-secondary) !important;
+        }
+        
+        /* Custom admin styles */
+        .admin-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-header h1 {
+            text-align: center;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+        
+        .admin-welcome {
+            text-align: center;
+            padding: 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-welcome h2 {
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+        }
+        
+        .admin-welcome p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        /* Loading state */
+        .admin-loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 50vh;
+        }
+        
+        .admin-loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--glass-border);
+            border-top: 3px solid var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive admin */
+        @media (max-width: 768px) {
+            .cms-sidebar {
+                width: 100% !important;
+                max-width: none !important;
+            }
+            
+            .cms-main {
+                margin-left: 0 !important;
+            }
+            
+            .admin-welcome {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="admin-loading" class="admin-loading" style="display: none;">
+        <div class="admin-loading-spinner"></div>
+    </div>
+
+    <!-- Admin Welcome Screen (shown when not logged in) -->
+    <div id="admin-welcome" class="admin-welcome" style="display: none;">
+        <h2>🚀 Portfolio Admin Dashboard</h2>
+        <p>Welcome to your portfolio management system. Here you can:</p>
+        <ul style="text-align: left; max-width: 400px; margin: 1rem auto;">
+            <li>✅ Add new projects with images</li>
+            <li>✅ Edit existing projects</li>
+            <li>✅ Manage technical skills</li>
+            <li>✅ Update site settings</li>
+            <li>✅ Upload media files</li>
+        </ul>
+        <p style="margin-top: 1rem;">
+            <strong>Click the login button below to get started.</strong>
+        </p>
+    </div>
+
+    <!-- Decap CMS will render here -->
+    <div id="cms-root"></div>
+    
+    <script>
+        // Show loading initially
+        document.getElementById('admin-loading').style.display = 'flex';
+        
+        // Decap CMS Configuration
+        window.CMS_CONFIG = {
+            backend: {
+                name: 'github',
+                repo: 'your-username/your-repo', // ⚠️ UPDATE THIS
+                branch: 'main',
+                api_root: 'https://api.github.com',
+                site_domain: 'your-site.netlify.app', // ⚠️ UPDATE THIS
+                base_url: 'https://api.netlify.com',
+                auth_endpoint: 'https://your-site.netlify.app/.netlify/identity', // ⚠️ UPDATE THIS
+                auth_type: 'pkce',
+            },
+            media_folder: 'assets/images',
+            public_folder: '/assets/images',
+            collections: [
+                {
+                    name: 'projects',
+                    label: '🚀 Projects',
+                    folder: 'content/projects',
+                    create: true,
+                    slug: '{{year}}-{{month}}-{{day}}-{{slug}}',
+                    fields: [
+                        {
+                            label: '📝 Project Title',
+                            name: 'title',
+                            widget: 'string',
+                            required: true,
+                            hint: 'Enter a descriptive title for your project'
+                        },
+                        {
+                            label: '📄 Project Image',
+                            name: 'image',
+                            widget: 'image',
+                            required: true,
+                            hint: 'Upload a high-quality screenshot or image',
+                            media_library: {
+                                config: {
+                                    multiple: false,
+                                    max_file_size: 5242880, // 5MB
+                                    allow_multiple_images: false
+                                }
+                            }
+                        },
+                        {
+                            label: '📋 Description',
+                            name: 'description',
+                            widget: 'text',
+                            required: true,
+                            hint: 'Describe your project in detail',
+                            default: ''
+                        },
+                        {
+                            label: '🛠️ Technologies',
+                            name: 'technologies',
+                            widget: 'list',
+                            field: {
+                                label: 'Technology',
+                                name: 'tech',
+                                widget: 'string',
+                                hint: 'e.g., React, Node.js, MongoDB'
+                            },
+                            hint: 'Add all technologies used in this project'
+                        },
+                        {
+                            label: '🔗 Live Demo URL',
+                            name: 'liveUrl',
+                            widget: 'string',
+                            required: false,
+                            hint: 'Link to the live project',
+                            pattern: ['^https?://', 'Must be a valid URL starting with http:// or https://']
+                        },
+                        {
+                            label: '💻 GitHub Repository',
+                            name: 'githubUrl',
+                            widget: 'string',
+                            required: false,
+                            hint: 'Link to the GitHub repository',
+                            pattern: ['^https?://', 'Must be a valid URL starting with http:// or https://']
+                        },
+                        {
+                            label: '⭐ Featured Project',
+                            name: 'featured',
+                            widget: 'boolean',
+                            default: false,
+                            hint: 'Show this project in featured section'
+                        },
+                        {
+                            label: '📊 Display Order',
+                            name: 'order',
+                            widget: 'number',
+                            default: 0,
+                            min: 0,
+                            step: 1,
+                            hint: 'Lower numbers appear first'
+                        }
+                    ],
+                    view_groups: [
+                        {
+                            name: 'Project Preview',
+                            fields: ['title', 'image', 'description']
+                        },
+                        {
+                            name: 'Technical Details',
+                            fields: ['technologies', 'liveUrl', 'githubUrl']
+                        },
+                        {
+                            name: 'Settings',
+                            fields: ['featured', 'order']
+                        }
+                    ]
+                },
+                {
+                    name: 'skills',
+                    label: '💡 Skills',
+                    folder: 'content/skills',
+                    create: true,
+                    slug: '{{slug}}',
+                    fields: [
+                        {
+                            label: '🏷️ Skill Name',
+                            name: 'name',
+                            widget: 'string',
+                            required: true,
+                            hint: 'e.g., JavaScript, React, Python'
+                        },
+                        {
+                            label: '🎨 Icon Class',
+                            name: 'icon',
+                            widget: 'string',
+                            required: true,
+                            hint: 'Font Awesome icon class (e.g., "fab fa-react")',
+                            default: 'fas fa-code'
+                        },
+                        {
+                            label: '📈 Proficiency Level',
+                            name: 'level',
+                            widget: 'number',
+                            min: 0,
+                            max: 100,
+                            step: 5,
+                            required: true,
+                            hint: 'Percentage from 0 to 100',
+                            default: 80
+                        },
+                        {
+                            label: '🎨 Progress Color',
+                            name: 'color',
+                            widget: 'color',
+                            required: true,
+                            hint: 'Color for the progress circle',
+                            default: '#667eea'
+                        },
+                        {
+                            label: '📂 Category',
+                            name: 'category',
+                            widget: 'select',
+                            options: [
+                                { label: '🎨 Frontend', value: 'Frontend' },
+                                { label: '⚙️ Backend', value: 'Backend' },
+                                { label: '🗄️ Database', value: 'Database' },
+                                { label: '🐳 DevOps', value: 'DevOps' },
+                                { label: '🎨 Design', value: 'Design' },
+                                { label: '📦 Other', value: 'Other' }
+                            ],
+                            default: 'Other'
+                        }
+                    ]
+                },
+                {
+                    name: 'settings',
+                    label: '⚙️ Site Settings',
+                    files: [
+                        {
+                            label: '🌐 General Settings',
+                            name: 'general',
+                            file: 'content/settings/general.json',
+                            fields: [
+                                {
+                                    label: '🏷️ Site Title',
+                                    name: 'siteTitle',
+                                    widget: 'string',
+                                    default: 'Web Developer Portfolio'
+                                },
+                                {
+                                    label: '📝 Site Description',
+                                    name: 'siteDescription',
+                                    widget: 'text',
+                                    default: 'Professional web developer portfolio showcasing modern web development projects'
+                                },
+                                {
+                                    label: '👤 Author Name',
+                                    name: 'authorName',
+                                    widget: 'string',
+                                    default: 'Web Developer'
+                                },
+                                {
+                                    label: '📧 Email',
+                                    name: 'email',
+                                    widget: 'string',
+                                    pattern: ['^[^@]+@[^@]+\\.[^@]+$', 'Must be a valid email address']
+                                },
+                                {
+                                    label: '📞 Phone',
+                                    name: 'phone',
+                                    widget: 'string',
+                                    required: false
+                                },
+                                {
+                                    label: '📍 Location',
+                                    name: 'location',
+                                    widget: 'string',
+                                    default: 'San Francisco, CA'
+                                },
+                                {
+                                    label: '🦸 Hero Title',
+                                    name: 'heroTitle',
+                                    widget: 'string',
+                                    default: 'Creative Web Developer'
+                                },
+                                {
+                                    label: '📝 Hero Subtitle',
+                                    name: 'heroSubtitle',
+                                    widget: 'text',
+                                    default: 'Building modern, responsive, and user-friendly web experiences with cutting-edge technologies'
+                                }
+                            ]
+                        },
+                        {
+                            label: '🔗 Social Links',
+                            name: 'social',
+                            file: 'content/settings/social.json',
+                            fields: [
+                                {
+                                    label: '🐙 GitHub',
+                                    name: 'github',
+                                    widget: 'string',
+                                    required: false,
+                                    hint: 'Your GitHub profile URL',
+                                    pattern: ['^https?://', 'Must be a valid URL']
+                                },
+                                {
+                                    label: '💼 LinkedIn',
+                                    name: 'linkedin',
+                                    widget: 'string',
+                                    required: false,
+                                    hint: 'Your LinkedIn profile URL',
+                                    pattern: ['^https?://', 'Must be a valid URL']
+                                },
+                                {
+                                    label: '🐦 Twitter',
+                                    name: 'twitter',
+                                    widget: 'string',
+                                    required: false,
+                                    hint: 'Your Twitter profile URL',
+                                    pattern: ['^https?://', 'Must be a valid URL']
+                                },
+                                {
+                                    label: '🎨 CodePen',
+                                    name: 'codepen',
+                                    widget: 'string',
+                                    required: false,
+                                    hint: 'Your CodePen profile URL',
+                                    pattern: ['^https?://', 'Must be a valid URL']
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+        
+        // Initialize Decap CMS with custom handling
+        CMS.init();
+        
+        // Handle CMS initialization
+        CMS.registerEventListener({
+            name: 'preInit',
+            handler: () => {
+                console.log('🚀 Initializing Admin Dashboard...');
+            }
+        });
+        
+        CMS.registerEventListener({
+            name: 'postInit',
+            handler: () => {
+                // Hide loading screen
+                document.getElementById('admin-loading').style.display = 'none';
+                
+                // Add custom admin header
+                const header = document.querySelector('.cms-header');
+                if (header) {
+                    header.innerHTML = `
+                        <div class="admin-header">
+                            <h1>🚀 Portfolio Admin Dashboard</h1>
+                        </div>
+                    `;
+                }
+                
+                console.log('✅ Admin Dashboard Ready!');
+            }
+        });
+        
+        // Handle authentication state
+        CMS.registerEventListener({
+            name: 'login',
+            handler: () => {
+                console.log('👤 User logged in');
+                document.getElementById('admin-welcome').style.display = 'none';
+            }
+        });
+        
+        CMS.registerEventListener({
+            name: 'logout',
+            handler: () => {
+                console.log('👋 User logged out');
+            }
+        });
+        
+        // Error handling
+        window.addEventListener('error', (e) => {
+            if (e.message.includes('CMS') || e.message.includes('decap')) {
+                console.error('❌ CMS Error:', e.message);
+                document.getElementById('admin-loading').style.display = 'none';
+                document.getElementById('admin-welcome').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+[
+    {
+        "name": "HTML5",
+        "icon": "fab fa-html5",
+        "level": 95,
+        "color": "#E34C26",
+        "category": "Frontend"
+    },
+    {
+        "name": "CSS3",
+        "icon": "fab fa-css3-alt",
+        "level": 90,
+        "color": "#1572B6",
+        "category": "Frontend"
+    },
+    {
+        "name": "JavaScript",
+        "icon": "fab fa-js",
+        "level": 88,
+        "color": "#F7DF1E",
+        "category": "Frontend"
+    },
+    {
+        "name": "React",
+        "icon": "fab fa-react",
+        "level": 85,
+        "color": "#61DAFB",
+        "category": "Frontend"
+    },
+    {
+        "name": "Vue.js",
+        "icon": "fab fa-vuejs",
+        "level": 80,
+        "color": "#4FC08D",
+        "category": "Frontend"
+    },
+    {
+        "name": "Node.js",
+        "icon": "fab fa-node-js",
+        "level": 82,
+        "color": "#339933",
+        "category": "Backend"
+    },
+    {
+        "name": "Python",
+        "icon": "fab fa-python",
+        "level": 78,
+        "color": "#3776AB",
+        "category": "Backend"
+    },
+    {
+        "name": "MongoDB",
+        "icon": "fas fa-database",
+        "level": 75,
+        "color": "#47A248",
+        "category": "Database"
+    },
+    {
+        "name": "PostgreSQL",
+        "icon": "fas fa-database",
+        "level": 70,
+        "color": "#336791",
+        "category": "Database"
+    },
+    {
+        "name": "Git",
+        "icon": "fab fa-git-alt",
+        "level": 92,
+        "color": "#F05032",
+        "category": "DevOps"
+    },
+    {
+        "name": "Docker",
+        "icon": "fab fa-docker",
+        "level": 75,
+        "color": "#2496ED",
+        "category": "DevOps"
+    },
+    {
+        "name": "AWS",
+        "icon": "fab fa-aws",
+        "level": 72,
+        "color": "#FF9900",
+        "category": "DevOps"
+    }
+]

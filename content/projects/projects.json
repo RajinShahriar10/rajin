@@ -1,0 +1,57 @@
+[
+    {
+        "id": 1,
+        "title": "E-Commerce Platform",
+        "description": "A modern e-commerce platform built with React and Node.js, featuring real-time inventory management, secure payment processing, and responsive design. Includes admin dashboard, product catalog, shopping cart, and order management system.",
+        "image": "assets/images/project1.jpg",
+        "technologies": ["React", "Node.js", "MongoDB", "Stripe", "Redux", "Tailwind CSS"],
+        "liveUrl": "https://example-ecommerce.com",
+        "githubUrl": "https://github.com/example/ecommerce-platform",
+        "featured": true,
+        "order": 1
+    },
+    {
+        "id": 2,
+        "title": "Task Management App",
+        "description": "Collaborative task management application with drag-and-drop functionality, real-time updates, team collaboration features, and advanced project tracking. Includes Kanban boards, Gantt charts, and team analytics.",
+        "image": "assets/images/project2.jpg",
+        "technologies": ["Vue.js", "Firebase", "Tailwind CSS", "Vuex", "Chart.js"],
+        "liveUrl": "https://example-tasks.com",
+        "githubUrl": "https://github.com/example/task-manager",
+        "featured": true,
+        "order": 2
+    },
+    {
+        "id": 3,
+        "title": "Weather Dashboard",
+        "description": "Interactive weather dashboard with location-based forecasts, historical data visualization, severe weather alerts, and beautiful weather animations. Features 7-day forecasts, weather maps, and customizable widgets.",
+        "image": "assets/images/project3.jpg",
+        "technologies": ["JavaScript", "Chart.js", "OpenWeather API", "Geolocation API", "CSS Animations"],
+        "liveUrl": "https://example-weather.com",
+        "githubUrl": "https://github.com/example/weather-dashboard",
+        "featured": false,
+        "order": 3
+    },
+    {
+        "id": 4,
+        "title": "Social Media Analytics",
+        "description": "Comprehensive analytics dashboard for social media metrics with data visualization, reporting features, sentiment analysis, and automated insights. Integrates with multiple social platforms.",
+        "image": "assets/images/project4.jpg",
+        "technologies": ["Python", "Django", "D3.js", "PostgreSQL", "Redis", "Docker"],
+        "liveUrl": "https://example-analytics.com",
+        "githubUrl": "https://github.com/example/social-analytics",
+        "featured": true,
+        "order": 4
+    },
+    {
+        "id": 5,
+        "title": "Portfolio Website",
+        "description": "Modern portfolio website with dynamic content management, optimized performance, stunning visual effects, and responsive design. Features smooth animations, dark theme, and admin panel.",
+        "image": "assets/images/project5.jpg",
+        "technologies": ["HTML5", "CSS3", "JavaScript", "Netlify CMS", "Netlify", "GitHub"],
+        "liveUrl": "https://example-portfolio.com",
+        "githubUrl": "https://github.com/example/portfolio-site",
+        "featured": false,
+        "order": 5
+    }
+]
