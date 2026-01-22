@@ -19,13 +19,13 @@ class CinematicCarousel {
 
     async loadProjects() {
         try {
-            // First try to load from admin localStorage
+            // First try to load from admin localStorage ( DataManager compatible)
             const adminProjects = localStorage.getItem('portfolioProjects');
             if (adminProjects) {
                 this.projects = JSON.parse(adminProjects);
                 console.log('📦 Loaded projects from admin panel:', this.projects.length);
             } else {
-                // Fallback to data file
+                // Try to load from data file
                 const response = await fetch('content/projects/projects.json');
                 if (response.ok) {
                     this.projects = await response.json();
