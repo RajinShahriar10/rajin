@@ -1160,49 +1160,161 @@ section {
     }
     
     .about-image {
-        max-width: 400px;
+        max-width: 350px;
         margin: 0 auto;
     }
     
     .about-img {
-        height: 400px;
+        height: 350px;
+        width: 100%;
+        object-fit: cover;
+    }
+    
+    .about-details {
+        padding: var(--spacing-sm);
     }
     
     .about-name {
         font-size: 2rem;
+        text-align: center;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .about-tagline {
+        text-align: center;
+        font-size: var(--font-size-sm);
+        margin-bottom: var(--spacing-md);
     }
     
     .about-actions {
         justify-content: center;
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
     }
     
     .info-item {
         flex-direction: column;
         text-align: center;
         gap: var(--spacing-sm);
+        padding: var(--spacing-sm);
+        margin-bottom: var(--spacing-sm);
     }
     
     .info-item:hover {
         transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .info-item i {
+        font-size: 1.8rem;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .info-content h4 {
+        font-size: var(--font-size-md);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .info-content p {
+        font-size: var(--font-size-sm);
+        line-height: 1.5;
     }
 }
 
 @media (max-width: 480px) {
-    .about-name {
-        font-size: 1.5rem;
+    .about {
+        padding: var(--spacing-lg) 0;
+    }
+    
+    .about-content {
+        gap: var(--spacing-sm);
+    }
+    
+    .about-image {
+        max-width: 300px;
+        margin: 0 auto var(--spacing-sm);
     }
     
     .about-img {
         height: 300px;
+        border-radius: 15px;
+    }
+    
+    .about-details {
+        padding: var(--spacing-xs);
+    }
+    
+    .about-name {
+        font-size: 1.8rem;
+        line-height: 1.2;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .about-tagline {
+        font-size: var(--font-size-xs);
+        margin-bottom: var(--spacing-sm);
+        padding: 0 var(--spacing-xs);
     }
     
     .about-actions {
         flex-direction: column;
         align-items: center;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-md);
     }
     
-    .btn {
+    .about-actions .btn {
         width: 100%;
+        max-width: 280px;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
+    }
+    
+    .info-item {
+        padding: var(--spacing-sm);
+        margin-bottom: var(--spacing-xs);
+        border-radius: 12px;
+    }
+    
+    .info-item i {
+        font-size: 1.5rem;
+    }
+    
+    .info-content h4 {
+        font-size: var(--font-size-sm);
+        margin-bottom: 2px;
+    }
+    
+    .info-content p {
+        font-size: var(--font-size-xs);
+        line-height: 1.4;
+    }
+}
+
+/* Extra small phones */
+@media (max-width: 360px) {
+    .about-image {
+        max-width: 280px;
+    }
+    
+    .about-img {
+        height: 280px;
+    }
+    
+    .about-name {
+        font-size: 1.6rem;
+    }
+    
+    .about-actions .btn {
         max-width: 250px;
+        font-size: 0.875rem;
+    }
+    
+    .info-item {
+        padding: var(--spacing-xs);
+    }
+    
+    .info-item i {
+        font-size: 1.3rem;
     }
 }

@@ -544,6 +544,61 @@
                 padding: 1.5rem;
             }
         }
+        
+        @media (max-width: 480px) {
+            .admin-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .admin-tabs {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .tab-btn {
+                font-size: 0.75rem;
+                padding: 0.75rem 1rem;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+            
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                font-size: 0.875rem;
+            }
+            
+            .info-input-group {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: stretch;
+            }
+            
+            .info-input-group select {
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .btn-add-tech {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
