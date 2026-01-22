@@ -360,6 +360,53 @@
             background: #0891b2;
         }
         
+        .image-upload-area {
+            border: 2px dashed var(--glass-border);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: var(--bg-tertiary);
+            margin-bottom: 1rem;
+        }
+        
+        .image-upload-area:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.05);
+        }
+        
+        .image-upload-area.dragover {
+            border-color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .image-preview {
+            margin-top: 1rem;
+            max-width: 100%;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .upload-info {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .upload-icon {
+            font-size: 2rem;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+        }
+        
         .form-actions {
             display: flex;
             gap: 1rem;
@@ -573,8 +620,22 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="projectImage">Project Image URL</label>
-                    <input type="url" id="projectImage" name="projectImage" placeholder="https://example.com/image.jpg">
+                    <label for="projectImage">Project Image</label>
+                    <div class="image-upload-area" id="imageUploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-info">
+                            <strong>Click to upload or drag and drop</strong><br>
+                            <small>PNG, JPG, GIF up to 10MB</small>
+                        </div>
+                        <input type="file" id="projectImageFile" accept="image/*" style="display: none;">
+                        <input type="hidden" id="projectImageData" name="projectImageData">
+                    </div>
+                    <div class="image-preview" id="imagePreview">
+                        <img id="previewImg" src="" alt="Preview">
+                    </div>
+                    <input type="url" id="projectImage" name="projectImage" placeholder="Or enter image URL directly" style="margin-top: 1rem;">
                 </div>
                 
                 <div class="form-group">
@@ -862,7 +923,7 @@
                 document.getElementById('projectId').value = project.id;
                 document.getElementById('projectTitle').value = project.title || '';
                 document.getElementById('projectDescription').value = project.description || '';
-                document.getElementById('projectImage').value = project.image || '';
+                document.getElementById('projectImage').value = project.image && !project.image.startsWith('data:') ? project.image : '';
                 document.getElementById('projectLiveUrl').value = project.liveUrl || '';
                 document.getElementById('projectGithubUrl').value = project.githubUrl || '';
                 
@@ -887,12 +948,29 @@
                 newInput.className = 'tech-input';
                 newInput.style.marginBottom = '0.5rem';
                 techInputs.appendChild(newInput);
+                
+                // Show existing image preview
+                if (project.image) {
+                    const previewImg = document.getElementById('previewImg');
+                    const imagePreview = document.getElementById('imagePreview');
+                    previewImg.src = project.image;
+                    imagePreview.style.display = 'block';
+                    if (project.image.startsWith('data:')) {
+                        document.getElementById('projectImageData').value = project.image;
+                    }
+                }
             } else {
                 document.getElementById('projectModalTitle').textContent = 'Add New Project';
                 form.reset();
+                document.getElementById('imagePreview').style.display = 'none';
             }
             
             modal.classList.add('active');
+            
+            // Initialize image upload after modal opens
+            setTimeout(() => {
+                initializeImageUpload();
+            }, 100);
         }
 
         function closeProjectModal() {
@@ -1010,6 +1088,86 @@
             techInputs.appendChild(newInput);
         }
 
+        // Image Upload Functionality
+        function initializeImageUpload() {
+            const uploadArea = document.getElementById('imageUploadArea');
+            const fileInput = document.getElementById('projectImageFile');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            const imageDataInput = document.getElementById('projectImageData');
+            const imageUrlInput = document.getElementById('projectImage');
+
+            // Click to upload
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File selection
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    handleImageFile(file);
+                }
+            });
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type.startsWith('image/')) {
+                        handleImageFile(file);
+                    } else {
+                        showMessage('Please upload an image file (PNG, JPG, GIF)', 'error');
+                    }
+                }
+            });
+
+            function handleImageFile(file) {
+                // Check file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    showMessage('File size must be less than 10MB', 'error');
+                    return;
+                }
+
+                // Read and display preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageData = e.target.result;
+                    previewImg.src = imageData;
+                    imagePreview.style.display = 'block';
+                    imageDataInput.value = imageData;
+                    imageUrlInput.value = ''; // Clear URL input when file is selected
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Handle URL input changes
+            imageUrlInput.addEventListener('input', (e) => {
+                const url = e.target.value;
+                if (url) {
+                    previewImg.src = url;
+                    imagePreview.style.display = 'block';
+                    imageDataInput.value = ''; // Clear file input when URL is entered
+                    fileInput.value = ''; // Clear file input
+                } else {
+                    imagePreview.style.display = 'none';
+                }
+            });
+        }
+
         // Form Submissions
         document.getElementById('projectForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -1018,11 +1176,16 @@
             const techInputs = document.querySelectorAll('.tech-input');
             const technologies = Array.from(techInputs).map(input => input.value).filter(val => val.trim() !== '');
             
+            // Handle image - prioritize uploaded file over URL
+            const imageData = document.getElementById('projectImageData').value;
+            const imageUrl = document.getElementById('projectImage').value;
+            const finalImage = imageData || imageUrl || 'https://via.placeholder.com/400x200/667eea/ffffff?text=No+Image';
+            
             const projectData = {
                 id: projectId ? parseInt(projectId) : Date.now(),
                 title: document.getElementById('projectTitle').value,
                 description: document.getElementById('projectDescription').value,
-                image: document.getElementById('projectImage').value || 'https://via.placeholder.com/400x200/667eea/ffffff?text=No+Image',
+                image: finalImage,
                 liveUrl: document.getElementById('projectLiveUrl').value,
                 githubUrl: document.getElementById('projectGithubUrl').value,
                 technologies: technologies
