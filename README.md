@@ -1,246 +1,140 @@
-# Modern Portfolio Website
+# Rajin Shahriar — Portfolio & Admin CMS
 
-A professional, dark-themed portfolio website for web developers with a dynamic admin dashboard powered by Decap CMS.
+A production-grade portfolio website with a full headless admin CMS.
 
-## 🚀 Features
+- **Public site** — static/dynamic marketing pages under `src/app/(site)`
+- **Admin CMS** — authenticated management UI under `/admin`
+- **PostgreSQL via Neon** in production, **SQLite** for local development
 
-- **Dark Futuristic Theme**: Modern glassmorphism design with electric blue and neon purple gradients
-- **Animated Hero Section**: Interactive tech background with particle effects and circuit patterns
-- **Cinematic Carousel**: Infinite project carousel with smooth transitions and touch support
-- **Dynamic Skills Section**: Circular progress loaders with viewport-triggered animations
-- **Admin Dashboard**: Full content management with Decap CMS
-- **Fully Responsive**: Optimized for mobile, tablet, and desktop
-- **SEO Optimized**: Meta tags, semantic HTML, and performance optimizations
-- **100% Free Stack**: No paid services or region-restricted storage
+## Tech Stack
 
-## 🛠️ Technology Stack
+| Layer | Choice |
+| --- | --- |
+| Framework | Next.js 16 (App Router, Turbopack) |
+| Language | TypeScript (`strict`) |
+| Styling | Tailwind CSS v4 + CSS custom-property design tokens |
+| Database | Prisma — SQLite (dev) / Neon PostgreSQL (prod) |
+| Auth | Auth.js v5 (NextAuth), credentials + bcrypt |
+| Animations | Motion (Framer Motion), Lenis smooth scroll |
+| 3D | Three.js + React Three Fiber, isolated & lazy-loaded |
+| Media | Cloudinary (upload + delivery) |
+| Forms | react-hook-form + Zod v4 |
+| UI primitives | Radix UI (headless) + shadcn-style wrappers |
 
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **CMS**: Decap CMS (Netlify CMS)
-- **Hosting**: Netlify (Free)
-- **Authentication**: Netlify Identity
-- **Content Storage**: GitHub + Markdown/YAML
-- **Icons**: Font Awesome
-- **Fonts**: Google Fonts (Inter)
-
-## 📁 Project Structure
+## Architecture
 
 ```
-portfolio/
-├── admin/                  # Admin dashboard
-│   └── index.html         # Decap CMS configuration
-├── assets/
-│   └── images/            # Project images and media
-├── content/
-│   ├── projects/          # Project content
-│   │   └── projects.json
-│   ├── skills/            # Skills data
-│   │   └── skills.json
-│   └── settings/          # Site settings
-│       ├── general.json
-│       └── social.json
-├── css/
-│   ├── style.css          # Main styles
-│   └── animations.css     # Animation classes
-├── js/
-│   ├── main.js            # Main functionality
-│   ├── carousel.js        # Project carousel
-│   ├── skills.js          # Skills animations
-│   ├── animations.js      # Animation controller
-│   └── contact.js         # Contact form handler
-├── index.html             # Main page
-├── netlify.toml           # Netlify configuration
-└── README.md              # This file
+src/
+  app/
+    (site)/            # public routes (grouped, no URL segment)
+    admin/             # /admin/login
+    admin/(protected)/ # /admin/* — gated by layout, shares AdminShell
+    api/               # route handlers (auth, contact, media, revalidate)
+  components/
+    ui/                # headless primitives: Button, Dialog, Skeleton, Select…
+    shared/            # site primitives: Reveal, PageTransition, ScrollProgress, Loading…
+    public/            # page-specific public components
+    admin/             # admin forms, tables, managers
+  lib/
+    data/              # data-access layer (server)
+    validation/        # Zod schemas + resolver
+    admin/actions.ts   # server actions
 ```
 
-## 🚀 Getting Started
+### Conventions
 
-### Prerequisites
+- **Route groups**: `(site)` and `admin/(protected)` are URL-transparent groups. `/admin/login` sits outside `(protected)` so the auth gate never wraps it.
+- **Design tokens**: all colors, radii, shadows, fonts, easing, and animations are CSS variables in `globals.css`, mapped to Tailwind via `@theme inline`. Dark-first with `.light` / `.dark` overrides; `next-themes` toggles the class.
+- **Error/loading boundaries**: `app/loading.tsx`, `app/error.tsx`, and `app/global-error.tsx` wrap the app and reuse `shared/loading` + `shared/error-state`.
+- **3D isolation**: `public/three/hero-scene.tsx` is imported with `next/dynamic(..., { ssr: false })` inside `hero-background.tsx`, so the WebGL bundle never blocks initial render.
 
-- GitHub account
-- Netlify account
-- Basic knowledge of Git
+## Getting Started
 
-### Installation
+Prerequisites: **Node.js ≥ 20** and npm.
 
-1. **Clone or Fork the Repository**
-   ```bash
-   git clone https://github.com/your-username/portfolio.git
-   cd portfolio
-   ```
-
-2. **Set Up Netlify**
-   - Go to [Netlify](https://netlify.com) and sign up
-   - Click "New site from Git"
-   - Connect your GitHub account
-   - Select the repository
-   - Build settings will be auto-configured
-
-3. **Configure Netlify Identity**
-   - In Netlify dashboard, go to Site settings → Identity
-   - Enable Identity service
-   - Enable registration and invite-only (recommended)
-   - Set your preferred authentication methods
-
-4. **Update Admin Configuration**
-   - Edit `admin/index.html`
-   - Replace the following placeholders:
-     - `your-username/your-repo` with your GitHub repository
-     - `your-site.netlify.app` with your Netlify domain
-     - Update the auth endpoint with your Netlify Identity URL
-
-5. **Deploy the Site**
-   - Commit and push your changes to GitHub
-   - Netlify will automatically deploy your site
-   - Visit `/admin` to access the dashboard
-
-### Content Management
-
-1. **Access Admin Panel**
-   - Go to `https://your-site.netlify.app/admin`
-   - Sign up or log in with Netlify Identity
-   - Start managing your content
-
-2. **Managing Projects**
-   - Add new projects with images
-   - Edit existing projects
-   - Upload images via drag & drop
-   - Set project order and featured status
-
-3. **Managing Skills**
-   - Add new skills with proficiency levels
-   - Update skill icons and colors
-   - Organize by categories
-
-4. **Site Settings**
-   - Update site title and description
-   - Configure contact information
-   - Set social media links
-
-## 🎨 Customization
-
-### Colors and Theme
-
-Edit the CSS variables in `css/style.css`:
-
-```css
-:root {
-    --bg-primary: #0a0a0a;           /* Main background */
-    --bg-secondary: #1a1a1a;         /* Secondary background */
-    --accent-blue: #667eea;          /* Primary accent */
-    --accent-purple: #764ba2;        /* Secondary accent */
-    --accent-cyan: #00d4ff;          /* Cyan highlights */
-    /* ... more variables */
-}
+```bash
+npm install
+cp .env.example .env.local   # then fill in values (see below)
+npm run db:setup             # migrate + seed the local SQLite database
+npm run dev
 ```
 
-### Animations
+Open [http://localhost:3000](http://localhost:3000).
 
-- Modify animation speeds in `css/animations.css`
-- Adjust intersection observer thresholds in `js/animations.js`
-- Customize particle effects in `js/main.js`
+## Environment Variables
 
-### Content Structure
+See [`.env.example`](.env.example) for the full template. Key variables:
 
-- Projects are stored in `content/projects/projects.json`
-- Skills are stored in `content/skills/skills.json`
-- Settings are in `content/settings/`
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Prisma connection string (`file:./dev.db` locally, Neon `postgresql://…?sslmode=require` in prod) |
+| `AUTH_SECRET` | Auth.js signing secret (`openssl rand -base64 32`) |
+| `AUTH_TRUST_HOST` | `true` for local/edge deploys |
+| `NEXTAUTH_URL` / `NEXT_PUBLIC_SITE_URL` | Canonical site URL |
+| `CLOUDINARY_CLOUD_NAME` / `API_KEY` / `API_SECRET` | Server-side signed uploads via the `cloudinary` SDK (`lib/cloudinary.ts`) |
+| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | Cloud name used by signed browser uploads |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Credentials used by `npm run db:seed` to create the admin user |
+| `REVALIDATE_SECRET` | Protects `POST /api/revalidate` (`openssl rand -hex 24`) |
 
-## 🔧 Advanced Configuration
+## Database
 
-### Custom Domains
+### Local development (SQLite)
 
-1. In Netlify dashboard, go to Domain settings
-2. Add your custom domain
-3. Update DNS records as instructed
-4. Update `netlify.toml` with your domain
+```bash
+npm run db:migrate   # apply migrations (prisma migrate dev)
+npm run db:seed      # seed admin user + content
+npm run db:studio    # Prisma Studio
+npm run db:reset     # reset schema + reseed
+```
 
-### Form Handling
+### Production (Neon PostgreSQL)
 
-The contact form includes a simulation for demo purposes. To enable real form submissions:
+The production schema lives at `prisma/schema.postgres.prisma` (a Postgres-tuned variant of the SQLite schema). `postinstall`, `db:generate`, and `db:seed` pick the schema automatically from `DATABASE_URL`.
 
-1. Use Netlify Forms (built-in)
-2. Or integrate with services like Formspree, Getform, or EmailJS
+1. Create a [Neon](https://neon.tech) project and copy its pooled connection string into `DATABASE_URL`.
+2. Sync the schema and push it to Neon:
 
-### Analytics
+```bash
+npm run db:migrate:prod
+```
 
-Add your preferred analytics:
+3. Seed the admin user + content:
 
-1. Google Analytics
-2. Plausible Analytics
-3. Fathom Analytics
+```bash
+npm run db:seed
+```
 
-## 📱 Mobile Optimization
+`db:migrate:prod` runs `prisma db push` (no migration history — the repo tracks the SQLite migrations for local dev). The client is generated at install time (`postinstall`).
 
-The site is fully responsive with:
+## Cloudinary
 
-- Touch-friendly navigation
-- Optimized carousel for mobile
-- Responsive grid layouts
-- Mobile-first approach
+1. Create a Cloudinary account and copy **Cloud name**, **API key**, and **API secret** into the server-side variables.
+2. Set the cloud name (public) in `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`.
 
-## 🚀 Performance
+Uploads are signed server-side via `/api/media/signature` (guarded by the admin session) so the API secret never reaches the client; files land in the `rajin` folder.
 
-- Optimized images with lazy loading
-- Minified CSS and JavaScript
-- GPU-accelerated animations
-- Efficient intersection observers
-- Optimized for Core Web Vitals
+## Authentication
 
-## 🛡️ Security
+Auth.js v5 with a credentials provider against the `User` table (`bcrypt` password hash). The `admin/(protected)/layout.tsx` calls the auth guard and redirects to `/admin/login` when unauthenticated. To change the admin password, use **Admin → Account**.
 
-- Content Security Policy headers
-- XSS protection
-- Secure authentication with Netlify Identity
-- HTTPS enforcement
+## Development Commands
 
-## 🤝 Contributing
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build (typecheck + lint) |
+| `npm run start` | Serve the production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run db:*` | Database operations (see above) |
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+## Production Deployment
 
-## 📄 License
+Deploy to **Vercel** (or any Node.js host):
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+1. Set all environment variables in the hosting provider (use Neon for `DATABASE_URL`).
+2. Set `AUTH_TRUST_HOST=true` and a stable `AUTH_SECRET`.
+3. Run `npm run db:migrate:prod` and `npm run db:seed` against the Neon database before the first deploy.
+4. Deploy. The build script generates the Prisma client and runs the Next.js build.
 
-## 🆘 Support
-
-If you encounter any issues:
-
-1. Check the [Netlify documentation](https://docs.netlify.com/)
-2. Review [Decap CMS documentation](https://decapcms.org/docs/)
-3. Open an issue in this repository
-
-## 🌟 Features Showcase
-
-### Hero Section
-- Animated particle background
-- Interactive mouse effects
-- Smooth fade-in animations
-- Gradient text effects
-
-### Project Carousel
-- Infinite loop behavior
-- Touch and swipe support
-- Keyboard navigation
-- Smooth cinematic transitions
-- Auto-play with pause on hover
-
-### Skills Section
-- Circular progress loaders
-- Viewport-triggered animations
-- Custom colors and icons
-- Glow effects on completion
-
-### Admin Dashboard
-- Drag & drop image uploads
-- Real-time content updates
-- User-friendly interface
-- Secure authentication
-
----
-
-**Built with ❤️ using modern web technologies**
+Images load from `res.cloudinary.com`; add the Neon host to any VPC/IP allow-list if required.

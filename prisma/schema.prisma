@@ -1,0 +1,457 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identity & Auth
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  image        String?
+  role         String   @default("admin")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Single-row content buckets
+// ---------------------------------------------------------------------------
+
+model Profile {
+  id                String   @id @default("main")
+  name              String
+  title             String
+  tagline           String?
+  summary           String?
+  bio               String?
+  profileImageUrl   String?
+  profileImageAlt   String?
+  resumeUrl         String?
+  resumePublicId    String?
+  email             String?
+  phone             String?
+  location          String?
+  website           String?
+  availability      String?
+  seoTitle          String?
+  seoDescription    String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Hero {
+  id                  String   @id @default("main")
+  eyebrow             String?
+  headline            String
+  subheadline         String?
+  description         String?
+  primaryCtaLabel     String?
+  primaryCtaHref      String?
+  secondaryCtaLabel   String?
+  secondaryCtaHref    String?
+  profileImageUrl     String?
+  profileImageAlt     String?
+  background          String? // "particles" | "grid" | "none"
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  stats               HeroStat[]
+}
+
+model HeroStat {
+  id        String   @id @default(cuid())
+  heroId    String   @default("main")
+  label     String
+  value     String
+  order     Int      @default(0)
+  hero      Hero     @relation(fields: [heroId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model About {
+  id              String   @id @default("main")
+  heading         String
+  content         String? // markdown
+  focus           String? // comma-separated focus areas
+  imageUrl        String?
+  imageAlt        String?
+  resumeUrl       String?
+  resumePublicId  String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  stats           AboutStat[]
+  principles      AboutPrinciple[]
+}
+
+model AboutStat {
+  id        String   @id @default(cuid())
+  aboutId   String   @default("main")
+  label     String
+  value     String
+  order     Int      @default(0)
+  about     About    @relation(fields: [aboutId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AboutPrinciple {
+  id        String   @id @default(cuid())
+  aboutId   String   @default("main")
+  title     String
+  summary   String
+  order     Int      @default(0)
+  about     About    @relation(fields: [aboutId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Skills
+// ---------------------------------------------------------------------------
+
+model SkillCategory {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  slug        String?  @unique
+  order       Int      @default(0)
+  visible     Boolean  @default(true)
+  skills      Skill[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  categoryId  String
+  name        String
+  level       Int? // optional proficiency 0-100, leave null when unknown
+  highlight   Boolean  @default(false)
+  order       Int      @default(0)
+  visible     Boolean  @default(true)
+  category    SkillCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([order])
+}
+
+// ---------------------------------------------------------------------------
+// Projects
+// ---------------------------------------------------------------------------
+
+model Project {
+  id                  String   @id @default(cuid())
+  title               String
+  slug                String   @unique
+  shortDescription    String?
+  description         String? // markdown
+  category            String?
+  featured            Boolean  @default(false)
+  status              String? // "completed" | "in-progress" | "archived"
+  startDate           DateTime?
+  completionDate      DateTime?
+  primaryImageUrl     String?
+  primaryImageAlt     String?
+  videoUrl            String?
+  githubUrl           String?
+  liveUrl             String?
+  documentationUrl    String?
+  role                String?
+  teamSize            Int?
+  architecture        String? // markdown
+  databaseInfo        String? // markdown
+  order               Int      @default(0)
+  published           Boolean  @default(true)
+  seoTitle            String?
+  seoDescription      String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  images       ProjectImage[]
+  technologies ProjectTechnology[]
+  features     ProjectFeature[]
+  metrics      ProjectMetric[]
+  challenges   ProjectChallenge[]
+  solutions    ProjectSolution[]
+
+  @@index([published])
+  @@index([featured])
+  @@index([order])
+  @@index([category])
+}
+
+model ProjectImage {
+  id          String   @id @default(cuid())
+  projectId   String
+  url         String
+  publicId    String?
+  alt         String?
+  order       Int      @default(0)
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+model ProjectTechnology {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  order     Int      @default(0)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+model ProjectFeature {
+  id        String   @id @default(cuid())
+  projectId String
+  content   String
+  order     Int      @default(0)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+model ProjectMetric {
+  id        String   @id @default(cuid())
+  projectId String
+  label     String
+  value     String
+  order     Int      @default(0)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+model ProjectChallenge {
+  id        String   @id @default(cuid())
+  projectId String
+  content   String
+  order     Int      @default(0)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+model ProjectSolution {
+  id        String   @id @default(cuid())
+  projectId String
+  content   String
+  order     Int      @default(0)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+// ---------------------------------------------------------------------------
+// Career & Academic
+// ---------------------------------------------------------------------------
+
+model Experience {
+  id           String   @id @default(cuid())
+  role         String
+  company      String
+  location     String?
+  startDate    DateTime?
+  endDate      DateTime?
+  current      Boolean  @default(false)
+  description  String? // markdown
+  technologies String? // comma separated
+  order        Int      @default(0)
+  visible      Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([order])
+}
+
+model Education {
+  id          String   @id @default(cuid())
+  degree      String
+  institution String
+  location    String?
+  startYear   String?
+  endYear     String?
+  current     Boolean  @default(false)
+  score       String?
+  description String?
+  order       Int      @default(0)
+  visible     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+}
+
+model Certificate {
+  id           String   @id @default(cuid())
+  title        String
+  issuer       String
+  issueDate    DateTime?
+  credentialId String?
+  url          String?
+  imageUrl     String?
+  imageAlt     String?
+  description  String?
+  order        Int      @default(0)
+  visible      Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([order])
+}
+
+model Achievement {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime?
+  category    String? // "academic" | "football" | ...
+  imageUrl    String?
+  imageAlt    String?
+  order       Int       @default(0)
+  visible     Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([order])
+  @@index([category])
+}
+
+model Research {
+  id             String   @id @default(cuid())
+  title          String
+  category       String?
+  authorPosition String? // e.g. "Lead Author", "Co-author"
+  conference     String? // e.g. "ICSE 2024"
+  institution    String? // e.g. "American International University-Bangladesh"
+  imageUrl       String?
+  imageAlt       String?
+  summary        String? // abstract
+  details        String? // markdown
+  url            String?
+  date           DateTime?
+  order          Int      @default(0)
+  visible        Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tags        ResearchTag[]
+
+  @@index([order])
+}
+
+model ResearchTag {
+  id         String   @id @default(cuid())
+  researchId String
+  name       String
+  order      Int      @default(0)
+  research   Research @relation(fields: [researchId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([researchId])
+}
+
+// ---------------------------------------------------------------------------
+// Contact & Social
+// ---------------------------------------------------------------------------
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  read      Boolean  @default(false)
+  archived  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([read])
+  @@index([archived])
+  @@index([createdAt])
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  platform  String // "github" | "linkedin" | "twitter" | "email" | ...
+  url       String
+  label     String?
+  order     Int      @default(0)
+  visible   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+}
+
+// ---------------------------------------------------------------------------
+// Settings, sections & media
+// ---------------------------------------------------------------------------
+
+model SiteSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SectionSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique // e.g. "projects"
+  label     String
+  visible   Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Media {
+  id           String   @id @default(cuid())
+  publicId     String   @unique
+  url          String
+  format       String?
+  width        Int?
+  height       Int?
+  bytes        Int?
+  resourceType String?
+  alt          String?
+  entityType   String? // e.g. "project" | "certificate" | "research" | "profile" | ...
+  entityId     String?
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}

@@ -1,0 +1,330 @@
+@import "tailwindcss";
+
+/* ===========================================================================
+   Design tokens — dark-first, one controlled accent, portable visual system.
+   Everything visual derives from these variables; retheme from one place.
+   =========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* surfaces */
+  --background: #08090b;
+  --foreground: #e7e9ec;
+
+  --card: #0c0e11;
+  --card-foreground: #e7e9ec;
+
+  --popover: #0c0e11;
+  --popover-foreground: #e7e9ec;
+
+  /* primary / accent — the single controlled accent */
+  --primary: #5eead4;
+  --primary-foreground: #04211d;
+
+  --accent: #5eead4;
+  --accent-foreground: #04211d;
+  --accent-soft: rgba(94, 234, 212, 0.1);
+
+  --secondary: #13161b;
+  --secondary-foreground: #e7e9ec;
+
+  --muted: #101318;
+  --muted-foreground: #8a919e;
+
+  --destructive: #f87171;
+  --destructive-foreground: #ffffff;
+
+  /* lines & focus */
+  --border: #1b1f26;
+  --input: #1b1f26;
+  --ring: #5eead4;
+
+  /* typography */
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
+
+  /* geometry */
+  --radius-sm: 0.375rem;
+  --radius: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+
+  /* motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
+
+  /* elevation */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 2px 6px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 24px rgba(94, 234, 212, 0.18);
+
+  /* misc */
+  --grid-line: rgba(255, 255, 255, 0.05);
+  --nav-height: 4.5rem;
+}
+
+.light {
+  color-scheme: light;
+
+  --background: #f6f7f8;
+  --foreground: #17191d;
+
+  --card: #ffffff;
+  --card-foreground: #17191d;
+
+  --popover: #ffffff;
+  --popover-foreground: #17191d;
+
+  --primary: #0f766e;
+  --primary-foreground: #ffffff;
+
+  --accent: #0f766e;
+  --accent-foreground: #ffffff;
+  --accent-soft: rgba(15, 118, 110, 0.08);
+
+  --secondary: #edeff1;
+  --secondary-foreground: #17191d;
+
+  --muted: #eff1f3;
+  --muted-foreground: #5c6370;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --border: #e2e5e9;
+  --input: #e2e5e9;
+  --ring: #0f766e;
+
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow: 0 2px 6px rgba(16, 24, 40, 0.06);
+  --shadow-md: 0 6px 16px rgba(16, 24, 40, 0.1);
+  --shadow-lg: 0 16px 40px rgba(16, 24, 40, 0.12);
+  --shadow-glow: 0 0 24px rgba(15, 118, 110, 0.15);
+
+  --grid-line: rgba(23, 25, 29, 0.06);
+}
+
+/* Tailwind v4 theme mapping */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: var(--radius-sm);
+  --radius: var(--radius);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-glow: var(--shadow-glow);
+
+  --ease-out-expo: var(--ease-out-expo);
+  --ease-in-out-quint: var(--ease-in-out-quint);
+
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-marquee-reverse: marquee-reverse 40s linear infinite;
+  --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
+  --animate-flow-dot: flow-dot 2.4s ease-in-out infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes marquee-reverse {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+      box-shadow: 0 0 0 0 var(--accent-soft);
+    }
+    50% {
+      opacity: 0.6;
+      box-shadow: 0 0 0 6px transparent;
+    }
+  }
+
+  /* Travelling dot along the architecture flow connectors. */
+  @keyframes flow-dot {
+    0% {
+      transform: translateY(-50%);
+      opacity: 0;
+    }
+    25% {
+      opacity: 1;
+    }
+    75% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(450%);
+      opacity: 0;
+    }
+  }
+}
+
+/* ===========================================================================
+   Base
+   =========================================================================== */
+
+html {
+  scroll-behavior: auto;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* Focus visibility (a11y) */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Subtle scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 8px;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===========================================================================
+   Typographic primitives
+   =========================================================================== */
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.tech-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* ===========================================================================
+   Layout helpers
+   =========================================================================== */
+
+.container-page {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 80rem;
+  padding-inline: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .container-page {
+    padding-inline: 2rem;
+  }
+}
+
+/* Full-bleed horizontal rail aligned with the page gutter (pinned sections). */
+.rail-gutter {
+  padding-inline: max(1.25rem, calc((100vw - 80rem) / 2 + 1.25rem));
+}
+
+@media (min-width: 640px) {
+  .rail-gutter {
+    padding-inline: max(2rem, calc((100vw - 80rem) / 2 + 2rem));
+  }
+}
+
+/* Background grid used by the hero */
+.bg-grid {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Subtle top-edge line used on sections */
+.section-edge {
+  border-top: 1px solid var(--border);
+}
+
+/* ===========================================================================
+   Reduced motion
+   =========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
