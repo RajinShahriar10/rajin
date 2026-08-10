@@ -18,11 +18,15 @@ import {
 export function DeleteButton({
   label,
   onDelete,
+  action,
+  id,
   confirmTitle = "Delete this item?",
   confirmDescription = "This action cannot be undone.",
 }: {
   label?: string;
-  onDelete: () => Promise<{ ok: boolean }>;
+  onDelete?: () => Promise<{ ok: boolean }>;
+  action?: (id: string) => Promise<{ ok: boolean }>;
+  id?: string;
   confirmTitle?: string;
   confirmDescription?: string;
 }) {
@@ -33,8 +37,13 @@ export function DeleteButton({
   async function handleDelete() {
     setPending(true);
     try {
-      const res = await onDelete();
-      if (!res.ok) throw new Error();
+      let res: { ok: boolean } | null = null;
+      if (action && id !== undefined) {
+        res = await action(id);
+      } else if (onDelete) {
+        res = await onDelete();
+      }
+      if (!res || !res.ok) throw new Error();
       toast.success("Deleted.");
       setOpen(false);
       router.refresh();

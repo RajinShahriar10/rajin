@@ -29,6 +29,7 @@ export default async function AdminEducationPage() {
             key: "degree",
             header: "Degree",
             searchable: true,
+            searchValue: (e) => [e.degree, e.institution].filter(Boolean).join(" "),
             cell: (e) => (
               <div>
                 <p className="font-medium">{e.degree}</p>
@@ -78,10 +79,8 @@ export default async function AdminEducationPage() {
                   </Link>
                 </Button>
                 <DeleteButton
-                  onDelete={async () => {
-                    const res = await deleteEducationAction(e.id);
-                    return { ok: res.ok };
-                  }}
+                  action={deleteEducationAction}
+                  id={e.id}
                   confirmTitle="Delete this education entry?"
                   confirmDescription={`"${e.degree} at ${e.institution}" will be permanently removed.`}
                 />

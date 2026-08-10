@@ -29,6 +29,7 @@ export default async function AdminCertificatesPage() {
             key: "title",
             header: "Title",
             searchable: true,
+            searchValue: (e) => [e.title, e.issuer, e.credentialId].filter(Boolean).join(" "),
             cell: (e) => (
               <div>
                 <p className="font-medium">{e.title}</p>
@@ -70,10 +71,8 @@ export default async function AdminCertificatesPage() {
                   </Link>
                 </Button>
                 <DeleteButton
-                  onDelete={async () => {
-                    const res = await deleteCertificateAction(e.id);
-                    return { ok: res.ok };
-                  }}
+                  action={deleteCertificateAction}
+                  id={e.id}
                   confirmTitle="Delete this certificate?"
                   confirmDescription={`"${e.title}" will be permanently removed.`}
                 />

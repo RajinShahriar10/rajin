@@ -178,15 +178,13 @@ export function ProjectForm({
                   <FormItem>
                     <FormLabel>Category</FormLabel>
                     <FormControl>
-                      <>
-                        <Input list="project-categories" placeholder="Full-Stack Web" {...field} />
-                        <datalist id="project-categories">
-                          {PROJECT_CATEGORIES.map((c) => (
-                            <option key={c} value={c} />
-                          ))}
-                        </datalist>
-                      </>
+                      <Input list="project-categories" placeholder="Full-Stack Web" {...field} />
                     </FormControl>
+                    <datalist id="project-categories">
+                      {PROJECT_CATEGORIES.map((c) => (
+                        <option key={c} value={c} />
+                      ))}
+                    </datalist>
                     <FormMessage />
                   </FormItem>
                 )}

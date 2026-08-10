@@ -33,6 +33,7 @@ export default async function AdminProjectsPage() {
             key: "title",
             header: "Title",
             searchable: true,
+            searchValue: (p) => [p.title, p.slug, p.category, p.status].filter(Boolean).join(" "),
             cell: (p) => (
               <div className="flex items-center gap-3">
                 {p.primaryImageUrl ? (
@@ -96,10 +97,8 @@ export default async function AdminProjectsPage() {
                   </Link>
                 </Button>
                 <DeleteButton
-                  onDelete={async () => {
-                    const res = await deleteProjectAction(p.id);
-                    return { ok: res.ok };
-                  }}
+                  action={deleteProjectAction}
+                  id={p.id}
                   confirmTitle="Delete this project?"
                   confirmDescription={`"${p.title}" and all its details will be permanently removed.`}
                 />

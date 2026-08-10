@@ -33,6 +33,10 @@ export default async function AdminResearchPage() {
             key: "title",
             header: "Title",
             searchable: true,
+            searchValue: (e) =>
+              [e.title, e.summary, e.authorPosition, e.conference, e.institution, e.tags.map((t) => t.name).join(" ")]
+                .filter(Boolean)
+                .join(" "),
             cell: (e) => (
               <div>
                 <p className="font-medium">{e.title}</p>
@@ -106,10 +110,8 @@ export default async function AdminResearchPage() {
                   </Link>
                 </Button>
                 <DeleteButton
-                  onDelete={async () => {
-                    const res = await deleteResearchAction(e.id);
-                    return { ok: res.ok };
-                  }}
+                  action={deleteResearchAction}
+                  id={e.id}
                   confirmTitle="Delete this research entry?"
                   confirmDescription={`"${e.title}" will be permanently removed.`}
                 />

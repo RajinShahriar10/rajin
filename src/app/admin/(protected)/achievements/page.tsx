@@ -30,6 +30,7 @@ export default async function AdminAchievementsPage() {
             key: "title",
             header: "Title",
             searchable: true,
+            searchValue: (e) => [e.title, e.description, e.category].filter(Boolean).join(" "),
             cell: (e) => (
               <div className="flex items-center gap-3">
                 {e.imageUrl ? (
@@ -83,10 +84,8 @@ export default async function AdminAchievementsPage() {
                   </Link>
                 </Button>
                 <DeleteButton
-                  onDelete={async () => {
-                    const res = await deleteAchievementAction(e.id);
-                    return { ok: res.ok };
-                  }}
+                  action={deleteAchievementAction}
+                  id={e.id}
                   confirmTitle="Delete this achievement?"
                   confirmDescription={`"${e.title}" will be permanently removed.`}
                 />

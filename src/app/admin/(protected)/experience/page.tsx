@@ -30,6 +30,7 @@ export default async function AdminExperiencePage() {
             key: "role",
             header: "Role",
             searchable: true,
+            searchValue: (e) => [e.role, e.company, e.location].filter(Boolean).join(" "),
             cell: (e) => (
               <div>
                 <p className="font-medium">{e.role}</p>
@@ -80,10 +81,8 @@ export default async function AdminExperiencePage() {
                   </Link>
                 </Button>
                 <DeleteButton
-                  onDelete={async () => {
-                    const res = await deleteExperienceAction(e.id);
-                    return { ok: res.ok };
-                  }}
+                  action={deleteExperienceAction}
+                  id={e.id}
                   confirmTitle="Delete this experience entry?"
                   confirmDescription={`"${e.role} at ${e.company}" will be permanently removed.`}
                 />
