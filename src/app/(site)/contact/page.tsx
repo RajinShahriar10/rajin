@@ -62,7 +62,7 @@ export default async function ContactPage() {
 
       <section className="container-page pb-24 pt-10">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.15fr]">
-          <Reveal>
+          <Reveal className="min-w-0">
             <div className="flex flex-col gap-6">
               <p className="max-w-md text-base leading-relaxed text-muted-foreground">
                 I&apos;m open to new opportunities, freelance work and
@@ -106,7 +106,7 @@ export default async function ContactPage() {
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary/30"
+                        className="flex min-w-0 items-center gap-3 rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary/30"
                       >
                         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-primary/30 bg-accent-soft">
                           <SocialIcon platform={link.platform} className="h-4 w-4 text-primary" />
@@ -145,7 +145,7 @@ export default async function ContactPage() {
             </div>
           </Reveal>
 
-          <Reveal delay={0.1}>
+          <Reveal delay={0.1} className="min-w-0">
             <div className="rounded-lg border border-border bg-card p-6 sm:p-8">
               <ContactForm />
             </div>

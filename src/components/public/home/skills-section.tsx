@@ -32,7 +32,7 @@ export function SkillsSection({ categories }: { categories: Category[] }) {
         />
 
         <div className="mx-auto mt-14 grid max-w-5xl gap-10 lg:grid-cols-[260px_1fr]">
-          <Reveal className="lg:order-1">
+          <Reveal className="min-w-0 lg:order-1">
             <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar lg:flex-col lg:gap-2">
               {categories.map((category) => (
                 <button
@@ -59,7 +59,7 @@ export function SkillsSection({ categories }: { categories: Category[] }) {
               animate={{ opacity: 1, y: 0 }}
               exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
               transition={{ duration: 0.3 }}
-              className="lg:order-2"
+              className="min-w-0 lg:order-2"
             >
               {active.description ? (
                 <p className="mb-6 text-sm text-muted-foreground">
