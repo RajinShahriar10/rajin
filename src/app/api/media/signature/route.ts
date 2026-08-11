@@ -36,10 +36,12 @@ export async function GET() {
   }
 
   const timestamp = Math.round(Date.now() / 1000);
+  // Note: Cloudinary does not include `max_bytes` in signature verification,
+  // so it must NOT be signed or every signature will be rejected. It is still
+  // sent on upload and enforced by Cloudinary.
   const paramsToSign = {
     timestamp,
     folder: UPLOAD_FOLDER,
-    max_bytes: MAX_BYTES,
     allowed_formats: ALLOWED_FORMATS.join(","),
   };
   const signature = cloudinary().utils.api_sign_request(
