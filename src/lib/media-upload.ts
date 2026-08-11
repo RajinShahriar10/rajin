@@ -35,6 +35,8 @@ export async function uploadFileToCloudinary(
   const formData = new FormData();
   formData.append("file", file);
   formData.append("folder", sig.folder);
+  formData.append("max_bytes", String(sig.maxBytes));
+  formData.append("allowed_formats", sig.allowedFormats.join(","));
   formData.append("api_key", sig.apiKey);
   formData.append("timestamp", String(sig.timestamp));
   formData.append("signature", sig.signature);
@@ -43,7 +45,10 @@ export async function uploadFileToCloudinary(
     `https://api.cloudinary.com/v1_1/${sig.cloudName}/auto/upload`,
     { method: "POST", body: formData },
   );
-  if (!res.ok) throw new Error("Upload failed.");
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Upload failed (${res.status}): ${detail}`);
+  }
 
   const data = await res.json();
   return {
