@@ -30,9 +30,6 @@ export default async function AdminLoginPage() {
         <div className="rounded-lg border border-border bg-card p-6">
           <LoginForm />
         </div>
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Credentials are set via ADMIN_EMAIL / ADMIN_PASSWORD during seeding.
-        </p>
       </div>
     </div>
   );
