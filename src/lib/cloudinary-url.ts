@@ -13,6 +13,8 @@ export type CloudinaryTransform = {
   aspect?: string;
   /** Crop instead of plain resize (fills the requested box). */
   crop?: boolean;
+  /** Crop focus. Defaults to Cloudinary's auto gravity; use "center" for a centered crop. */
+  gravity?: "auto" | "center" | "face";
   /** Numeric quality or Cloudinary's "auto" optimization. */
   quality?: number | "auto";
   format?: string;
@@ -44,7 +46,7 @@ export function cloudinaryUrl(
   if (transform.quality) parts.push(`q_${transform.quality}`);
   if (transform.width) parts.push(`w_${transform.width}`);
   if (transform.height) parts.push(`h_${transform.height}`);
-  if (transform.crop) parts.push("c_fill", "g_auto");
+  if (transform.crop) parts.push("c_fill", transform.gravity ? `g_${transform.gravity}` : "g_auto");
   if (transform.crop && transform.aspect) parts.push(`ar_${transform.aspect}`);
   if (transform.effect) parts.push(`e_${transform.effect}`);
 

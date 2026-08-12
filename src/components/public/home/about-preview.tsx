@@ -39,7 +39,7 @@ export function AboutPreview({
                   alt={about.imageAlt || "About"}
                   fill
                   sizes="(min-width: 1024px) 28rem, 100vw"
-                  transform={{ aspect: "4:5", crop: true }}
+                  transform={{ aspect: "4:5", crop: true, gravity: "center" }}
                   className="object-cover"
                 />
               ) : (

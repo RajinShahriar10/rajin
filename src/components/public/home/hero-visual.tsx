@@ -144,7 +144,7 @@ export function HeroVisual({ imageUrl, imageAlt }: HeroVisualProps) {
                   fill
                   priority
                   sizes="(min-width: 1024px) 24rem, 0px"
-                  transform={{ aspect: "4:5", crop: true }}
+                  transform={{ aspect: "4:5", crop: true, gravity: "center" }}
                   className="object-cover"
                 />
               ) : (
