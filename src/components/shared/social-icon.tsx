@@ -1,7 +1,6 @@
 import {
   AtSign,
   Camera,
-  Code,
   CodeXml,
   FileCode2,
   Globe,
@@ -12,14 +11,17 @@ import {
   Play,
   Rss,
   Send,
-  type LucideIcon,
 } from "lucide-react";
+import type { ComponentType, SVGProps } from "react";
+import { GithubIcon, LinkedinIcon } from "@/components/shared/brand-icons";
 
-const PLATFORM_ICONS: Record<string, LucideIcon> = {
-  github: Code,
+type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+
+const PLATFORM_ICONS: Record<string, IconComponent> = {
+  github: GithubIcon,
   gitlab: CodeXml,
   bitbucket: FileCode2,
-  linkedin: Link2,
+  linkedin: LinkedinIcon,
   twitter: AtSign,
   x: AtSign,
   facebook: MessageCircle,
