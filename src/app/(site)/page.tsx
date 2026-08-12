@@ -41,8 +41,8 @@ export async function generateMetadata() {
  */
 const DEFAULT_SECTION_ORDER = [
   "hero",
-  "projects",
   "marquee",
+  "projects",
   "about",
   "skills",
   "experience",
