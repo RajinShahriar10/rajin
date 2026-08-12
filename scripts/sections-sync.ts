@@ -12,10 +12,10 @@ const prisma = new PrismaClient();
 
 const SECTION_ORDER = [
   "hero",
+  "projects",
   "marquee",
   "about",
   "skills",
-  "projects",
   "experience",
   "education",
   "research",
