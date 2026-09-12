@@ -99,8 +99,8 @@ export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
         >
           {projects.map((project, i) => {
             const dist = Math.abs(i - index);
-            const scale = dist === 0 ? 1 : 0.95;
-            const opacity = dist === 0 ? 1 : 0;
+            const scale = dist === 0 ? 1 : 0.92;
+            const opacity = dist === 0 ? 1 : Math.max(1 - dist * 0.35, 0.15);
             return (
               <motion.div
                 key={project.id}
