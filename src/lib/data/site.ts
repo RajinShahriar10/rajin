@@ -2,27 +2,28 @@ import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 
 export const getSiteData = cache(async () => {
-  const [profile, hero, about, settings, sections, socialLinks] =
-    await Promise.all([
-      prisma.profile.findUnique({ where: { id: "main" } }),
-      prisma.hero.findUnique({
-        where: { id: "main" },
-        include: { stats: { orderBy: { order: "asc" } } },
-      }),
-      prisma.about.findUnique({
-        where: { id: "main" },
-        include: {
-          stats: { orderBy: { order: "asc" } },
-          principles: { orderBy: { order: "asc" } },
-        },
-      }),
-      prisma.siteSetting.findMany(),
-      prisma.sectionSetting.findMany({ orderBy: { order: "asc" } }),
-      prisma.socialLink.findMany({
-        where: { visible: true },
-        orderBy: { order: "asc" },
-      }),
-    ]);
+  // Queries run one at a time to keep concurrent load on the pooled Neon
+  // connection low during static-generation bursts (P2024 pool timeouts).
+  const profile = await prisma.profile.findUnique({ where: { id: "main" } });
+  const hero = await prisma.hero.findUnique({
+    where: { id: "main" },
+    include: { stats: { orderBy: { order: "asc" } } },
+  });
+  const about = await prisma.about.findUnique({
+    where: { id: "main" },
+    include: {
+      stats: { orderBy: { order: "asc" } },
+      principles: { orderBy: { order: "asc" } },
+    },
+  });
+  const settings = await prisma.siteSetting.findMany();
+  const sections = await prisma.sectionSetting.findMany({
+    orderBy: { order: "asc" },
+  });
+  const socialLinks = await prisma.socialLink.findMany({
+    where: { visible: true },
+    orderBy: { order: "asc" },
+  });
 
   const settingsMap = Object.fromEntries(
     settings.map((s) => [s.key, s.value]),
