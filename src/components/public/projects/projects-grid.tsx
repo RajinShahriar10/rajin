@@ -130,7 +130,7 @@ export function ProjectsGrid({ projects }: { projects: ProjectCardData[] }) {
                       }
                 }
               >
-                <ProjectCard project={project} index={i} className="h-full" />
+                <ProjectCard project={project} index={i} imageFit="contain" className="h-full" />
               </motion.li>
             ))}
           </motion.ul>
