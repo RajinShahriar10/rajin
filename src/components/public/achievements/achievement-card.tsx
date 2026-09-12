@@ -1,6 +1,10 @@
-import { Award, Medal, Trophy } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Award, Maximize2, Medal, Trophy } from "lucide-react";
 import { cn, formatDate } from "@/lib/utils";
 import { CloudinaryImage } from "@/components/shared/cloudinary-image";
+import { ImageLightbox } from "@/components/shared/image-lightbox";
 
 export type AchievementCardData = {
   id: string;
@@ -29,6 +33,8 @@ export function AchievementCard({
   achievement: AchievementCardData;
   className?: string;
 }) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
   const football = isFootball(achievement.category);
   const Icon = football
     ? Trophy
@@ -47,15 +53,39 @@ export function AchievementCard({
       )}
     >
       {achievement.imageUrl ? (
-        <div className="relative h-40 overflow-hidden border-b border-border bg-muted/30">
-          <CloudinaryImage
+        <>
+          <div className="relative h-40 overflow-hidden border-b border-border bg-muted/30">
+            <CloudinaryImage
+              src={achievement.imageUrl}
+              alt={achievement.imageAlt || achievement.title}
+              fill
+              sizes="(min-width: 1024px) 26rem, (min-width: 640px) 50vw, 100vw"
+              className="object-contain"
+            />
+            <button
+              type="button"
+              onClick={() => setLightboxOpen(true)}
+              aria-label={`Open ${achievement.title} image in fullscreen`}
+              className="absolute inset-0 z-10 cursor-zoom-in"
+            />
+            <button
+              type="button"
+              onClick={() => setLightboxOpen(true)}
+              aria-label="View award image fullscreen"
+              className="absolute right-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-md border border-white/15 bg-black/40 text-white/80 backdrop-blur-sm transition-colors hover:border-white/40 hover:text-white"
+            >
+              <Maximize2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          <ImageLightbox
             src={achievement.imageUrl}
             alt={achievement.imageAlt || achievement.title}
-            fill
-            sizes="(min-width: 1024px) 26rem, (min-width: 640px) 50vw, 100vw"
-            className="object-contain"
+            open={lightboxOpen}
+            onClose={() => setLightboxOpen(false)}
+            backLabel="Back to awards"
           />
-        </div>
+        </>
       ) : null}
 
       <div className="flex flex-1 flex-col gap-3 p-6">
