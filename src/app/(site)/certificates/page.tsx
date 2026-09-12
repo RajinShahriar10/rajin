@@ -44,8 +44,7 @@ export default async function CertificatesPage() {
                           alt={cert.imageAlt || `${cert.title} badge`}
                           fill
                           sizes="10rem"
-                          transform={{ aspect: "16:6", crop: true }}
-                          className="object-cover"
+                          className="object-contain"
                         />
                       </div>
                     ) : (

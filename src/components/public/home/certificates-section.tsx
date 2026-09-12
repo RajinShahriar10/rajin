@@ -59,8 +59,7 @@ export function CertificatesSection({
                       alt={cert.imageAlt || `${cert.title} badge`}
                       fill
                       sizes="(min-width: 1024px) 18rem, (min-width: 640px) 33vw, 100vw"
-                      transform={{ aspect: "16:7", crop: true }}
-                      className="object-cover"
+                      className="object-contain"
                     />
                   </div>
                 ) : (
