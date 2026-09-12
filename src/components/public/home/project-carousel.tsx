@@ -12,14 +12,15 @@ const CARD_FRACTION = 0.82;
 const CARD_MAX = 416;
 
 /**
- * Premium drag/swipe project carousel. A single Motion track pages through
- * cards with springs; the active card scales forward while neighbours recede.
- * Falls back to direct snapping when the user prefers reduced motion.
+ * Centered project carousel: one card at a time, paged 1-by-1 with the
+ * prev/next buttons (or swipe on touch). The active card sits in the middle of
+ * the viewport; neighbours fade out until they reach the center.
  */
 export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
   const prefersReducedMotion = useReducedMotion();
   const viewportRef = useRef<HTMLDivElement>(null);
   const [cardW, setCardW] = useState(0);
+  const [offset, setOffset] = useState(0);
   const [index, setIndex] = useState(0);
 
   const count = projects.length;
@@ -30,13 +31,15 @@ export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
   const x = useMotionValue(0);
   const springX = useSpring(x, { stiffness: 320, damping: 38, mass: 0.6 });
 
-  // Measure the viewport so cards (and snap steps) stay in px units.
+  // Measure the viewport so cards, the center offset and snap steps are exact.
   useEffect(() => {
     const el = viewportRef.current;
     if (!el) return;
     const measure = () => {
       const w = el.clientWidth;
-      setCardW(Math.min(Math.max(w * CARD_FRACTION, 260), CARD_MAX));
+      const nextCard = Math.min(Math.max(w * CARD_FRACTION, 260), CARD_MAX);
+      setCardW(nextCard);
+      setOffset(Math.max(0, (w - nextCard) / 2));
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -48,23 +51,29 @@ export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
     (target: number) => {
       const next = Math.max(0, Math.min(maxIndex, target));
       setIndex(next);
-      x.set(-next * step);
+      x.set(offset - next * step);
     },
-    [maxIndex, step, x],
+    [maxIndex, step, offset, x],
   );
+
+  // Re-center when the viewport or page index changes.
+  useEffect(() => {
+    x.set(offset - index * step);
+  }, [offset, index, step, x]);
 
   const onDragEnd = useCallback(
     (_: unknown, info: { offset: { x: number }; velocity: { x: number } }) => {
       if (step <= 0) return;
-      let projected = -x.get() - info.offset.x;
+      let projected = -x.get() + offset - info.offset.x;
       if (Math.abs(info.velocity.x) > 500) projected -= info.velocity.x * 0.15;
       const next = Math.round(projected / step);
       goTo(next);
     },
-    [goTo, step, x],
+    [goTo, step, offset, x],
   );
 
   const draggable = !prefersReducedMotion && count > 1;
+  const trackX = offset - index * step;
 
   return (
     <div>
@@ -81,25 +90,27 @@ export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
             draggable && "cursor-grab active:cursor-grabbing",
           )}
           style={draggable ? { x: springX } : undefined}
-          animate={!draggable ? { x: -index * step } : undefined}
+          animate={!draggable ? { x: trackX } : undefined}
           transition={!draggable ? { duration: 0 } : undefined}
           drag={draggable ? "x" : false}
-          dragConstraints={{ left: -maxIndex * step, right: 0 }}
+          dragConstraints={{ left: offset - maxIndex * step, right: offset }}
           dragElastic={0.1}
           onDragEnd={onDragEnd}
         >
           {projects.map((project, i) => {
             const dist = Math.abs(i - index);
-            const scale = dist === 0 ? 1 : Math.max(1 - dist * 0.04, 0.88);
-            const opacity = dist === 0 ? 1 : Math.max(1 - dist * 0.22, 0.4);
+            const scale = dist === 0 ? 1 : 0.95;
+            const opacity = dist === 0 ? 1 : 0;
             return (
               <motion.div
                 key={project.id}
                 initial={false}
                 style={{ width: cardW || CARD_MAX }}
                 className={cn("shrink-0", i > 0 && "ml-6")}
-                animate={!prefersReducedMotion ? { scale, opacity } : undefined}
-                transition={!prefersReducedMotion ? { duration: 0.5, ease: [0.16, 1, 0.3, 1] } : undefined}
+                animate={{ scale, opacity }}
+                transition={
+                  prefersReducedMotion ? { duration: 0 } : { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+                }
               >
                 <ProjectCard project={project} index={i} />
               </motion.div>
