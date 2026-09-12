@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight, Menu, X } from "lucide-react";
@@ -40,9 +40,13 @@ const SPY_IDS = [
 /** Sections that map to a primary nav item for active highlighting. */
 const SECTION_TO_NAV: Record<string, string> = {
   about: "about",
+  skills: "skills",
   projects: "projects",
   experience: "experience",
+  education: "education",
   research: "research",
+  certificates: "certificates",
+  achievements: "achievements",
   contact: "contact",
 };
 
@@ -64,6 +68,43 @@ export function SiteHeader({
   const isHome = pathname === "/";
   const activeSection = useScrollSpy(isHome ? SPY_IDS : [], { offset: 140 });
   const sectionNavKey = activeSection ? SECTION_TO_NAV[activeSection] : null;
+
+  const scrollToId = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "start",
+      });
+    }
+  };
+
+  const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!href.startsWith("/#")) return;
+    if (!isHome) return;
+    e.preventDefault();
+    setOpen(false);
+    scrollToId(href.slice(2));
+  };
+
+  // After client-side navigation to "/#section" (e.g. from another page),
+  // scroll to the requested homepage section once it has mounted.
+  useEffect(() => {
+    if (!isHome) return;
+    const { hash } = window.location;
+    if (!hash || hash.length < 2) return;
+    const id = hash.slice(1);
+    const t = window.setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({
+          behavior: prefersReducedMotion ? "auto" : "smooth",
+          block: "start",
+        });
+      }
+    }, 80);
+    return () => window.clearTimeout(t);
+  }, [pathname, isHome, prefersReducedMotion]);
 
   if (prevPathname !== pathname) {
     setPrevPathname(pathname);
@@ -134,7 +175,7 @@ export function SiteHeader({
         </Link>
 
         <nav
-          className="hidden items-center gap-1 lg:flex"
+          className="hidden items-center gap-1 xl:flex"
           aria-label="Primary navigation"
         >
           {navItems.map((item) => {
@@ -145,6 +186,7 @@ export function SiteHeader({
               <Link
                 key={item.key}
                 href={item.href}
+                onClick={(e) => handleNavClick(e, item.href)}
                 className={cn(
                   "relative rounded-md px-3 py-2 text-sm transition-colors",
                   active
@@ -181,7 +223,9 @@ export function SiteHeader({
           {cta && (
             <Magnetic className="hidden md:block">
               <Button asChild variant="default" size="sm" className="ml-2">
-                <Link href={cta.href}>{cta.label}</Link>
+                <Link href={cta.href} onClick={(e) => handleNavClick(e, cta.href)}>
+                  {cta.label}
+                </Link>
               </Button>
             </Magnetic>
           )}
@@ -189,7 +233,7 @@ export function SiteHeader({
             ref={menuToggleRef}
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="xl:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="mobile-menu"
@@ -207,7 +251,7 @@ export function SiteHeader({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: prefersReducedMotion ? 0 : DURATION.fast }}
-            className="fixed inset-0 top-[var(--nav-height)] z-50 bg-background/95 backdrop-blur-xl lg:hidden"
+            className="fixed inset-0 top-[var(--nav-height)] z-50 bg-background/95 backdrop-blur-xl xl:hidden"
             id="mobile-menu"
             ref={menuPanelRef}
           >
@@ -231,6 +275,7 @@ export function SiteHeader({
                 >
                   <Link
                     href={item.href}
+                    onClick={(e) => handleNavClick(e, item.href)}
                     className={cn(
                       "flex items-center justify-between rounded-lg px-2 py-4 font-display text-2xl font-semibold tracking-tight",
                       sectionNavKey
@@ -280,7 +325,9 @@ export function SiteHeader({
                   className="mt-auto"
                 >
                   <Button asChild size="lg" className="w-full">
-                    <Link href={cta.href}>{cta.label}</Link>
+                    <Link href={cta.href} onClick={(e) => handleNavClick(e, cta.href)}>
+                      {cta.label}
+                    </Link>
                   </Button>
                 </motion.div>
               )}

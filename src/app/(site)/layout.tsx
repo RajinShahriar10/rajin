@@ -31,7 +31,7 @@ export default async function SiteLayout({
           siteName={siteName}
           initials={initials(profile?.name ?? siteName)}
           navItems={navItems}
-          cta={{ label: "Contact", href: "/contact" }}
+          cta={{ label: "Contact", href: "/#contact" }}
           resumeUrl={profile?.resumeUrl}
         />
         <main id="main-content" className="flex-1 pt-[var(--nav-height)]">

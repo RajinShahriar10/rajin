@@ -44,24 +44,33 @@ export const getSiteUrl = cache(async () => {
   );
 });
 
+/**
+ * Nav-worthy homepage sections and the site setting that overrides their label.
+ * Order follows the homepage `SectionSetting` order, mirroring the rendered page.
+ */
+const NAV_LABEL_KEYS: Record<string, string> = {
+  about: "navAbout",
+  skills: "navSkills",
+  projects: "navProjects",
+  experience: "navExperience",
+  education: "navEducation",
+  research: "navResearch",
+  certificates: "navCertificates",
+  achievements: "navAchievements",
+  contact: "navContact",
+};
+
 export const getNavItems = cache(async () => {
-  const { settings, sectionMap } = await getSiteData();
+  const { settings, sections, sectionMap } = await getSiteData();
   const items: Array<{ label: string; href: string; key: string }> = [];
-  const defs: Array<{ key: string; labelKey: string; href: string }> = [
-    { key: "about", labelKey: "navAbout", href: "/about" },
-    { key: "projects", labelKey: "navProjects", href: "/projects" },
-    { key: "experience", labelKey: "navExperience", href: "/experience" },
-    { key: "research", labelKey: "navResearch", href: "/research" },
-    { key: "certificates", labelKey: "navCertificates", href: "/certificates" },
-    { key: "contact", labelKey: "navContact", href: "/contact" },
-  ];
-  for (const def of defs) {
-    const section = sectionMap[def.key];
-    if (section && !section.visible) continue;
+  for (const section of sections) {
+    const labelKey = NAV_LABEL_KEYS[section.key];
+    if (!labelKey) continue;
+    if (sectionMap[section.key] && !sectionMap[section.key].visible) continue;
     items.push({
-      key: def.key,
-      label: settings[def.labelKey] || def.key,
-      href: def.href,
+      key: section.key,
+      label: settings[labelKey] || section.label || section.key,
+      href: `/#${section.key}`,
     });
   }
   return items;

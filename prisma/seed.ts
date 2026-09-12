@@ -321,6 +321,9 @@ async function main() {
     { key: "navResearch", value: "Research", description: "Navigation label" },
     { key: "navCertificates", value: "Certificates", description: "Navigation label" },
     { key: "navContact", value: "Contact", description: "Navigation label" },
+    { key: "navSkills", value: "Skills", description: "Navigation label" },
+    { key: "navEducation", value: "Education", description: "Navigation label" },
+    { key: "navAchievements", value: "Achievements", description: "Navigation label" },
     {
       key: "contact_email",
       value: "rajinshahriar.official@gmail.com",
