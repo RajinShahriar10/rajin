@@ -43,10 +43,12 @@ export function ProjectCard({
   project,
   index,
   className,
+  imageFit = "cover",
 }: {
   project: ProjectCardData;
   index?: number;
   className?: string;
+  imageFit?: "cover" | "contain";
 }) {
   const prefersReducedMotion = useReducedMotion();
   const coverRef = useRef<HTMLDivElement>(null);
@@ -99,8 +101,12 @@ export function ProjectCard({
               alt={project.primaryImageAlt || project.title}
               fill
               sizes="(min-width: 1024px) 30rem, (min-width: 640px) 45vw, 90vw"
-              transform={{ aspect: "4:5", crop: true }}
-              className="scale-[1.12] object-cover transition-transform duration-700 ease-out group-hover:scale-[1.16]"
+              transform={imageFit === "contain" ? undefined : { aspect: "4:5", crop: true }}
+              className={cn(
+                imageFit === "contain"
+                  ? "object-contain"
+                  : "scale-[1.12] object-cover transition-transform duration-700 ease-out group-hover:scale-[1.16]",
+              )}
             />
           </motion.div>
         ) : (

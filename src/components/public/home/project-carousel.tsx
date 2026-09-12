@@ -13,8 +13,8 @@ const CARD_MAX = 416;
 
 /**
  * Centered project carousel: one card at a time, paged 1-by-1 with the
- * prev/next buttons (or swipe on touch). The active card sits in the middle of
- * the viewport; neighbours fade out until they reach the center.
+ * prev/next buttons (or swipe on touch). The active card sits in the middle and
+ * neighbours stay visible but dimmed. Auto-advances every 2s, looping.
  */
 export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
   const prefersReducedMotion = useReducedMotion();
@@ -60,6 +60,17 @@ export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
   useEffect(() => {
     x.set(offset - index * step);
   }, [offset, index, step, x]);
+
+  // Auto-advance the carousel every 2s, looping back to the start. The timer
+  // restarts on every index change, so manual paging or a drag countdown
+  // continues from the new position.
+  useEffect(() => {
+    if (prefersReducedMotion || count <= 1) return;
+    const id = setInterval(() => {
+      goTo(index >= count - 1 ? 0 : index + 1);
+    }, 2000);
+    return () => clearInterval(id);
+  }, [prefersReducedMotion, count, index, goTo]);
 
   const onDragEnd = useCallback(
     (_: unknown, info: { offset: { x: number }; velocity: { x: number } }) => {
@@ -112,7 +123,7 @@ export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
                   prefersReducedMotion ? { duration: 0 } : { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
                 }
               >
-                <ProjectCard project={project} index={i} />
+                <ProjectCard project={project} index={i} imageFit="contain" />
               </motion.div>
             );
           })}
