@@ -4,6 +4,7 @@ import { getSiteData, getNavItems } from "@/lib/data/site";
 import { initials } from "@/lib/utils";
 import { ThemeToggle } from "@/components/public/layout/theme-toggle";
 import { SocialIcon } from "@/components/shared/social-icon";
+import { FooterNav } from "@/components/public/layout/footer-nav";
 
 export async function SiteFooter() {
   const { profile, settings, socialLinks } = await getSiteData();
@@ -48,18 +49,7 @@ export async function SiteFooter() {
 
           <div>
             <p className="tech-label mb-4">Navigation</p>
-            <ul className="flex flex-col gap-2.5">
-              {navItems.map((item) => (
-                <li key={item.key}>
-                  <Link
-                    href={item.href}
-                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <FooterNav items={navItems} />
           </div>
 
           <div>
