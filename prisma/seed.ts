@@ -75,7 +75,7 @@ async function main() {
       description:
         "Software Engineer building secure full-stack, desktop and database-driven applications with ASP.NET Core, C#, Java and SQL Server.",
       primaryCtaLabel: "View Projects",
-      primaryCtaHref: "/projects",
+      primaryCtaHref: "/#projects",
       secondaryCtaLabel: "Contact Me",
       secondaryCtaHref: "/contact",
       profileImageUrl: null,
@@ -90,7 +90,7 @@ async function main() {
       description:
         "Software Engineer building secure full-stack, desktop and database-driven applications with ASP.NET Core, C#, Java and SQL Server.",
       primaryCtaLabel: "View Projects",
-      primaryCtaHref: "/projects",
+      primaryCtaHref: "/#projects",
       secondaryCtaLabel: "Contact Me",
       secondaryCtaHref: "/contact",
       profileImageUrl: null,

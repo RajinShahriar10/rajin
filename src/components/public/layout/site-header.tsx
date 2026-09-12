@@ -11,6 +11,7 @@ import { Magnetic } from "@/components/shared/magnetic";
 import { Button } from "@/components/ui/button";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useScrollSpy } from "@/hooks/use-scroll-spy";
+import { useSectionScroll } from "@/hooks/use-section-scroll";
 import { DURATION, EASE, STAGGER } from "@/lib/motion";
 
 type NavItem = { label: string; href: string; key: string };
@@ -68,23 +69,11 @@ export function SiteHeader({
   const isHome = pathname === "/";
   const activeSection = useScrollSpy(isHome ? SPY_IDS : [], { offset: 140 });
   const sectionNavKey = activeSection ? SECTION_TO_NAV[activeSection] : null;
-
-  const scrollToId = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({
-        behavior: prefersReducedMotion ? "auto" : "smooth",
-        block: "start",
-      });
-    }
-  };
+  const { handleSectionClick, scrollToId } = useSectionScroll();
 
   const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (!href.startsWith("/#")) return;
-    if (!isHome) return;
-    e.preventDefault();
-    setOpen(false);
-    scrollToId(href.slice(2));
+    handleSectionClick(e, href);
+    if (isHome) setOpen(false);
   };
 
   // After client-side navigation to "/#section" (e.g. from another page),
@@ -93,18 +82,9 @@ export function SiteHeader({
     if (!isHome) return;
     const { hash } = window.location;
     if (!hash || hash.length < 2) return;
-    const id = hash.slice(1);
-    const t = window.setTimeout(() => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({
-          behavior: prefersReducedMotion ? "auto" : "smooth",
-          block: "start",
-        });
-      }
-    }, 80);
+    const t = window.setTimeout(() => scrollToId(hash.slice(1)), 80);
     return () => window.clearTimeout(t);
-  }, [pathname, isHome, prefersReducedMotion]);
+  }, [pathname, isHome, scrollToId]);
 
   if (prevPathname !== pathname) {
     setPrevPathname(pathname);

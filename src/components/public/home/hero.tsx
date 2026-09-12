@@ -9,6 +9,7 @@ import { HeroVisual } from "@/components/public/home/hero-visual";
 import { Magnetic } from "@/components/shared/magnetic";
 import { Button } from "@/components/ui/button";
 import { AnimatedNumber } from "@/components/shared/animated-number";
+import { useSectionScroll } from "@/hooks/use-section-scroll";
 import { parseStat } from "@/lib/stats";
 import { fadeUp } from "@/lib/motion";
 
@@ -33,6 +34,13 @@ type HeroProps = {
 
 export function HeroSection({ hero }: HeroProps) {
   const stats = hero.stats ?? [];
+  const { handleSectionClick } = useSectionScroll();
+  const {
+    primaryCtaLabel,
+    primaryCtaHref,
+    secondaryCtaLabel,
+    secondaryCtaHref,
+  } = hero;
 
   return (
     <section
@@ -94,28 +102,34 @@ export function HeroSection({ hero }: HeroProps) {
             </motion.p>
           ) : null}
 
-          {(hero.primaryCtaLabel || hero.secondaryCtaLabel) && (
+          {(primaryCtaLabel || secondaryCtaLabel) && (
             <motion.div
               className="mt-2 flex flex-wrap items-center gap-3"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={fadeUp(0.55)}
             >
-              {hero.primaryCtaLabel && hero.primaryCtaHref && (
+              {primaryCtaLabel && primaryCtaHref && (
                 <Magnetic>
                   <Button asChild size="lg">
-                    <Link href={hero.primaryCtaHref}>
-                      {hero.primaryCtaLabel}
+                    <Link
+                      href={primaryCtaHref}
+                      onClick={(e) => handleSectionClick(e, primaryCtaHref)}
+                    >
+                      {primaryCtaLabel}
                       <ArrowUpRight />
                     </Link>
                   </Button>
                 </Magnetic>
               )}
-              {hero.secondaryCtaLabel && hero.secondaryCtaHref && (
+              {secondaryCtaLabel && secondaryCtaHref && (
                 <Magnetic>
                   <Button asChild variant="outline" size="lg">
-                    <Link href={hero.secondaryCtaHref}>
-                      {hero.secondaryCtaLabel}
+                    <Link
+                      href={secondaryCtaHref}
+                      onClick={(e) => handleSectionClick(e, secondaryCtaHref)}
+                    >
+                      {secondaryCtaLabel}
                     </Link>
                   </Button>
                 </Magnetic>
