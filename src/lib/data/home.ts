@@ -11,9 +11,9 @@ export const getHomeProjects = cache(async () => {
 
 export const getFeaturedProjects = cache(async (limit = 4) => {
   return prisma.project.findMany({
-    where: { published: true },
+    where: { published: true, featured: true },
     include: { technologies: { orderBy: { order: "asc" } } },
-    orderBy: [{ featured: "desc" }, { order: "asc" }],
+    orderBy: { order: "asc" },
     take: limit,
   });
 });
