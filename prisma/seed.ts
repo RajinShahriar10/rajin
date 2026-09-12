@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { skillCategories } from "./skills-data";
+import { seedProjects } from "./projects-data";
 
 const prisma = new PrismaClient();
 
@@ -208,132 +209,19 @@ async function main() {
     }
   }
 
-  // --- Projects --------------------------------------------------------------
-  const projects = [
-    {
-      slug: "digital-wallet-system",
-      title: "Digital Wallet System",
-      category: "Fintech",
-      shortDescription:
-        "A full-stack fintech application for digital payments, built with ASP.NET Core 8 and JWT-based authentication.",
-      description:
-        "A full-stack fintech application built with ASP.NET Core 8, C#, EF Core, SQL Server, JWT and Bootstrap 5 — covering account management, transactions and secure API access.",
-      role: "Solo Developer",
-      featured: true,
-      published: true,
-      order: 0,
-      status: "completed",
-      completionDate: new Date("2026-06-01"),
-      githubUrl: null,
-      liveUrl: null,
-      primaryImageUrl: null,
-      primaryImageAlt: null,
-      technologies: ["ASP.NET Core 8", "C#", "EF Core", "SQL Server", "JWT", "Bootstrap 5"],
-    },
-    {
-      slug: "bangladesh-airlines-reservation-portal",
-      title: "Bangladesh Airlines Reservation Portal",
-      category: "Java Desktop",
-      shortDescription:
-        "A Java desktop application for flight listing, seat availability and ticket booking.",
-      description:
-        "Built with Java Swing using OOP. Covers flight listing, seat availability and ticket booking, with passenger data validation, booking history and file-based storage for all records.",
-      role: "Solo Developer",
-      featured: true,
-      published: true,
-      order: 1,
-      status: "completed",
-      completionDate: new Date("2025-06-01"),
-      githubUrl: null,
-      liveUrl: null,
-      primaryImageUrl: null,
-      primaryImageAlt: null,
-      technologies: ["Java", "Java Swing", "OOP"],
-    },
-    {
-      slug: "stockflow-inventory-pos",
-      title: "StockFlow — Inventory & POS Management System",
-      category: "Inventory & POS",
-      shortDescription:
-        "A desktop inventory and point-of-sale management system built with C# and a 3-layer architecture.",
-      description:
-        "A desktop-based inventory and point-of-sale management system built with C# (Windows Forms) and SQL Server using a 3-layer architecture separating UI, business logic and data access.",
-      role: "Solo Developer",
-      featured: true,
-      published: true,
-      order: 2,
-      status: "completed",
-      completionDate: new Date("2026-05-01"),
-      githubUrl: null,
-      liveUrl: null,
-      primaryImageUrl: null,
-      primaryImageAlt: null,
-      technologies: ["C#", "Windows Forms", "SQL Server", ".NET Framework"],
-    },
-    {
-      slug: "machang-studio",
-      title: "Machang Studio — Architecture Firm Website",
-      category: "Web",
-      shortDescription:
-        "A modern responsive website for an architecture firm with a project showcase.",
-      description:
-        "A modern responsive website for an architecture firm with a project showcase, clear visual hierarchy and cross-device compatibility, built with HTML5, CSS3, JavaScript and Tailwind CSS.",
-      role: "Solo Developer",
-      featured: false,
-      published: true,
-      order: 3,
-      status: "completed",
-      completionDate: new Date("2026-02-01"),
-      githubUrl: null,
-      liveUrl: null,
-      primaryImageUrl: null,
-      primaryImageAlt: null,
-      technologies: ["HTML5", "CSS3", "JavaScript", "Tailwind CSS"],
-    },
-  ];
-
-  for (const project of projects) {
+  // --- Projects (data shared with targeted live-sync script) ----------------
+  for (const project of seedProjects) {
+    const { technologies, completionDate, ...data } = project;
     const record = await prisma.project.upsert({
-      where: { slug: project.slug },
-      update: {
-        title: project.title,
-        category: project.category,
-        shortDescription: project.shortDescription,
-        description: project.description,
-        role: project.role,
-        featured: project.featured,
-        published: project.published,
-        order: project.order,
-        status: project.status,
-        completionDate: project.completionDate,
-        githubUrl: project.githubUrl,
-        liveUrl: project.liveUrl,
-        primaryImageUrl: project.primaryImageUrl,
-        primaryImageAlt: project.primaryImageAlt,
-      },
-      create: {
-        slug: project.slug,
-        title: project.title,
-        category: project.category,
-        shortDescription: project.shortDescription,
-        description: project.description,
-        role: project.role,
-        featured: project.featured,
-        published: project.published,
-        order: project.order,
-        status: project.status,
-        completionDate: project.completionDate,
-        githubUrl: project.githubUrl,
-        liveUrl: project.liveUrl,
-        primaryImageUrl: project.primaryImageUrl,
-        primaryImageAlt: project.primaryImageAlt,
-      },
+      where: { slug: data.slug },
+      update: { ...data, completionDate: new Date(completionDate) },
+      create: { ...data, completionDate: new Date(completionDate) },
     });
 
     await prisma.projectTechnology.deleteMany({ where: { projectId: record.id } });
-    if (project.technologies.length > 0) {
+    if (technologies.length > 0) {
       await prisma.projectTechnology.createMany({
-        data: project.technologies.map((name, i) => ({
+        data: technologies.map((name, i) => ({
           name,
           projectId: record.id,
           order: i,
