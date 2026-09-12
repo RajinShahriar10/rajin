@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import { CloudinaryImage } from "@/components/shared/cloudinary-image";
@@ -15,9 +16,26 @@ type ImageLightboxProps = {
   backLabel?: string;
 };
 
+const emptySubscribe = () => () => {};
+
+/**
+ * True once the component is rendering on the client. Used to defer the
+ * portal to `document.body`, which does not exist during SSR.
+ */
+function useIsClient() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+}
+
 /**
  * Fullscreen single-image preview with a Back button, Esc and backdrop-click
- * to close. Locks body scroll while open.
+ * to close. Locks body scroll while open. Rendered through a portal to
+ * `document.body` so it works even when the trigger sits inside a
+ * `transform`ed ancestor (e.g. a carousel card), which would otherwise break
+ * `position: fixed`.
  */
 export function ImageLightbox({
   src,
@@ -27,6 +45,7 @@ export function ImageLightbox({
   backLabel = "Back",
 }: ImageLightboxProps) {
   const prefersReducedMotion = useReducedMotion();
+  const isClient = useIsClient();
 
   useEffect(() => {
     if (!open) return;
@@ -46,7 +65,9 @@ export function ImageLightbox({
     };
   }, [open]);
 
-  return (
+  if (!isClient) return null;
+
+  return createPortal(
     <AnimatePresence>
       {open ? (
         <motion.div
@@ -96,6 +117,7 @@ export function ImageLightbox({
           </div>
         </motion.div>
       ) : null}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
