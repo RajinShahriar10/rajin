@@ -1,27 +1,18 @@
 import Link from "next/link";
-import { ArrowRight, Award, ExternalLink } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { ArrowRight } from "lucide-react";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { CloudinaryImage } from "@/components/shared/cloudinary-image";
 import { Reveal } from "@/components/shared/reveal";
 import { SectionEmpty } from "@/components/shared/section-empty";
-
-type CertificateData = {
-  id: string;
-  title: string;
-  issuer: string;
-  issueDate?: Date | null;
-  credentialId?: string | null;
-  url?: string | null;
-  imageUrl?: string | null;
-  imageAlt?: string | null;
-  description?: string | null;
-};
+import { CardCarousel } from "@/components/shared/card-carousel";
+import {
+  CertificateCard,
+  type CertificateCardData,
+} from "@/components/public/certificates/certificate-card";
 
 export function CertificatesSection({
   certificates,
 }: {
-  certificates: CertificateData[];
+  certificates: CertificateCardData[];
 }) {
   if (certificates.length === 0) {
     return (
@@ -48,57 +39,16 @@ export function CertificatesSection({
           description="Certifications and credentials I have earned."
         />
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {certificates.map((cert, i) => (
-            <Reveal key={cert.id} delay={(i % 3) * 0.07}>
-              <div className="group flex h-full flex-col gap-3 rounded-lg border border-border bg-card p-6 transition-colors hover:border-primary/30">
-                {cert.imageUrl ? (
-                  <div className="relative h-24 w-full overflow-hidden rounded-md border border-border bg-muted/30">
-                    <CloudinaryImage
-                      src={cert.imageUrl}
-                      alt={cert.imageAlt || `${cert.title} badge`}
-                      fill
-                      sizes="(min-width: 1024px) 18rem, (min-width: 640px) 33vw, 100vw"
-                      className="object-contain"
-                    />
-                  </div>
-                ) : (
-                  <span className="flex h-10 w-10 items-center justify-center rounded-md border border-primary/30 bg-accent-soft">
-                    <Award className="h-4 w-4 text-primary" />
-                  </span>
-                )}
-
-                <h3 className="font-display text-base font-semibold leading-snug tracking-tight">
-                  {cert.title}
-                </h3>
-
-                <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                  <span>{cert.issuer}</span>
-                  {cert.issueDate ? (
-                    <span className="tech-label">{formatDate(cert.issueDate)}</span>
-                  ) : null}
-                </div>
-
-                {cert.credentialId ? (
-                  <p className="text-xs text-muted-foreground">
-                    Credential ID: {cert.credentialId}
-                  </p>
-                ) : null}
-
-                {cert.url ? (
-                  <a
-                    href={cert.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-auto inline-flex items-center gap-1 pt-2 text-sm font-medium text-primary transition-opacity hover:opacity-80"
-                  >
-                    Verify
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                ) : null}
-              </div>
-            </Reveal>
-          ))}
+        <div className="mt-14">
+          <CardCarousel
+            label="Certificates"
+            previousLabel="Previous certificate"
+            nextLabel="Next certificate"
+          >
+            {certificates.map((cert) => (
+              <CertificateCard key={cert.id} certificate={cert} />
+            ))}
+          </CardCarousel>
         </div>
 
         <div className="mt-10 text-center">
