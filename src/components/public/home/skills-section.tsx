@@ -17,6 +17,15 @@ type Category = {
 
 const ORB_TRANSITION = { duration: 11, repeat: Infinity, ease: "easeInOut" as const };
 
+// Cosmetic bar widths (no % shown) used when a skill has no explicit level,
+// so each bar reads differently without claiming measurable proficiency.
+const BAR_WIDTHS = [82, 74, 90, 68, 85, 72, 88, 76, 92, 65, 80, 70];
+
+function skillBarWidth(skill: { level?: number | null; highlight: boolean }, index: number): number {
+  if (typeof skill.level === "number" && skill.level > 0) return Math.min(skill.level, 100);
+  return Math.min(BAR_WIDTHS[index % BAR_WIDTHS.length] + (skill.highlight ? 6 : 0), 100);
+}
+
 export function SkillsSection({ categories }: { categories: Category[] }) {
   const [activeId, setActiveId] = useState(categories[0]?.id ?? "");
   const prefersReducedMotion = useReducedMotion();
@@ -26,20 +35,20 @@ export function SkillsSection({ categories }: { categories: Category[] }) {
 
   const containerVariants: Variants = {
     hidden: {},
-    visible: { transition: { staggerChildren: STAGGER.quick, delayChildren: 0.12 } },
+    visible: { transition: { staggerChildren: STAGGER.quick, delayChildren: 0.1 } },
     exit: { transition: { staggerChildren: 0.03, staggerDirection: -1 } },
   };
 
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 14 },
+  const rowVariants: Variants = {
+    hidden: { opacity: 0, x: prefersReducedMotion ? 0 : -14 },
     visible: {
       opacity: 1,
-      y: 0,
+      x: 0,
       transition: { duration: DURATION.base, ease: EASE.outExpo },
     },
     exit: {
       opacity: 0,
-      y: prefersReducedMotion ? 0 : -8,
+      x: prefersReducedMotion ? 0 : -10,
       transition: { duration: DURATION.fast, ease: EASE.linear },
     },
   };
@@ -95,14 +104,16 @@ export function SkillsSection({ categories }: { categories: Category[] }) {
                           transition={{ type: "spring", stiffness: 380, damping: 34 }}
                         />
                       ) : null}
-                      <span className="relative z-10 flex items-center gap-2">
-                        <span
-                          className={cn(
-                            "h-1.5 w-1.5 shrink-0 rounded-full transition-colors",
-                            selected ? "bg-primary" : "bg-foreground/25 group-hover:bg-primary/60",
-                          )}
-                          aria-hidden
-                        />
+                      <span className="relative z-10 flex items-center gap-2 lg:justify-start">
+                        {selected ? (
+                          <motion.span
+                            className="h-1.5 w-1.5 rounded-full bg-primary"
+                            animate={prefersReducedMotion ? undefined : { scale: [1, 1.45, 1] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                          />
+                        ) : (
+                          <span className="h-1.5 w-1.5 rounded-full bg-foreground/25 transition-colors group-hover:bg-foreground/50" />
+                        )}
                         {category.name}
                       </span>
                     </button>
@@ -123,111 +134,93 @@ export function SkillsSection({ categories }: { categories: Category[] }) {
                 exit={prefersReducedMotion ? undefined : "exit"}
                 className="rounded-2xl border border-border/60 bg-card/40 p-6 backdrop-blur-sm sm:p-8"
               >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  {active.description ? (
-                    <motion.p
-                      variants={itemVariants}
-                      className="max-w-md text-sm text-muted-foreground"
-                    >
-                      {active.description}
-                    </motion.p>
-                  ) : null}
+                {active.description ? (
+                  <motion.p variants={rowVariants} className="max-w-md text-sm text-muted-foreground">
+                    {active.description}
+                  </motion.p>
+                ) : null}
 
-                  {/* Decorative live-loader indicator */}
+                {/* Category transition bar — sweeps in on every tab change */}
+                <motion.div
+                  variants={rowVariants}
+                  className="relative mt-5 h-1.5 w-full overflow-hidden rounded-full bg-border/70"
+                >
+                  <motion.div
+                    className="relative h-full rounded-full bg-gradient-to-r from-primary/60 via-primary to-primary/60"
+                    initial={prefersReducedMotion ? false : { width: "0%" }}
+                    animate={prefersReducedMotion ? undefined : { width: "100%" }}
+                    transition={{ duration: 0.9, ease: EASE.outExpo }}
+                  />
                   <motion.span
-                    variants={itemVariants}
                     aria-hidden
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 py-1"
-                  >
-                    {[0, 1, 2].map((dot) => (
-                      <motion.span
-                        key={dot}
-                        className="h-1.5 w-1.5 rounded-full bg-primary/80"
-                        animate={
-                          prefersReducedMotion
-                            ? undefined
-                            : { opacity: [0.2, 1, 0.2], scale: [1, 1.3, 1] }
-                        }
-                        transition={{
-                          duration: 1.1,
-                          repeat: Infinity,
-                          delay: dot * 0.18,
-                          ease: "easeInOut",
-                        }}
-                      />
-                    ))}
-                  </motion.span>
-                </div>
+                    className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                    animate={prefersReducedMotion ? undefined : { left: ["-35%", "120%"] }}
+                    transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                </motion.div>
 
-                {/* Skills with animated loading bars */}
-                <motion.ul variants={itemVariants} className="mt-6 space-y-5">
+                {/* Skills as animated loading bars (no percentages) */}
+                <div className="mt-8 space-y-4">
                   {active.skills.map((skill, index) => {
-                    const level = Math.min(Math.max(skill.level ?? 80, 5), 100);
+                    const width = skillBarWidth(skill, index);
+                    const highlighted = skill.highlight;
                     return (
-                      <li key={skill.id} className="group">
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="inline-flex min-w-0 items-center gap-2.5 text-sm font-medium text-foreground">
-                            <span
-                              className={cn(
-                                "h-2 w-2 shrink-0 rounded-[4px] transition-all duration-300",
-                                skill.highlight
-                                  ? "bg-primary shadow-glow"
-                                  : "bg-foreground/25 group-hover:bg-primary/70",
-                              )}
-                              aria-hidden
-                            />
-                            <span className="truncate">{skill.name}</span>
+                      <motion.div key={skill.id} variants={rowVariants} className="group">
+                        <div className="flex items-center justify-between">
+                          <span
+                            className={cn(
+                              "text-sm font-medium transition-colors",
+                              highlighted ? "text-primary" : "text-foreground/90",
+                            )}
+                          >
+                            {skill.name}
                           </span>
                           <span
-                            className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground/20 transition-all duration-300 group-hover:animate-pulse-dot group-hover:bg-primary/80"
                             aria-hidden
+                            className={cn(
+                              "ml-3 h-1 w-1 rounded-full transition-colors",
+                              highlighted
+                                ? "bg-primary"
+                                : "bg-foreground/30 group-hover:bg-foreground/60",
+                            )}
                           />
                         </div>
 
-                        <div
-                          className={cn(
-                            "relative mt-2 h-1.5 w-full overflow-hidden rounded-full ring-1 ring-inset transition-colors duration-300",
-                            skill.highlight
-                              ? "bg-muted ring-primary/20"
-                              : "bg-muted/80 ring-border/40 group-hover:ring-primary/30",
-                          )}
-                        >
-                          {/* Diagonal-cut animated fill */}
+                        <div className="relative mt-2 h-2 w-full overflow-hidden rounded-full bg-border/50">
+                          {/* Fill */}
                           <motion.div
                             className={cn(
-                              "relative h-full rounded-full",
-                              skill.highlight
-                                ? "bg-gradient-to-r from-primary/40 via-primary to-primary/70 shadow-glow"
-                                : "bg-gradient-to-r from-primary/25 via-primary/70 to-primary/40",
+                              "h-full rounded-full",
+                              highlighted
+                                ? "bg-gradient-to-r from-primary/70 via-primary to-primary/80 shadow-[0_0_14px_rgba(255,255,255,0.25)]"
+                                : "bg-gradient-to-r from-primary/35 via-primary/60 to-primary/35",
                             )}
-                            style={prefersReducedMotion ? { width: `${level}%` } : undefined}
                             initial={prefersReducedMotion ? false : { width: "0%" }}
-                            animate={prefersReducedMotion ? undefined : { width: `${level}%` }}
+                            animate={prefersReducedMotion ? undefined : { width: `${width}%` }}
                             transition={{
-                              duration: 0.9,
+                              duration: 0.8,
                               ease: EASE.outExpo,
-                              delay: 0.15 + index * 0.05,
+                              delay: 0.1 + index * 0.05,
                             }}
-                          >
-                            {!prefersReducedMotion ? (
-                              <motion.span
-                                aria-hidden
-                                className="absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                                animate={{ left: ["-40%", "130%"] }}
-                                transition={{
-                                  duration: 1.3,
-                                  repeat: Infinity,
-                                  ease: EASE.inOutQuint,
-                                  repeatDelay: 0.5,
-                                }}
-                              />
-                            ) : null}
-                          </motion.div>
+                          />
+                          {/* Shimmer sweep */}
+                          <motion.span
+                            aria-hidden
+                            className="absolute inset-y-0 w-1/4 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                            initial={prefersReducedMotion ? false : { left: "-30%" }}
+                            animate={prefersReducedMotion ? undefined : { left: ["-30%", "130%"] }}
+                            transition={{
+                              duration: 1.3,
+                              ease: "easeInOut",
+                              delay: 0.6 + index * 0.06,
+                              repeat: Infinity,
+                            }}
+                          />
                         </div>
-                      </li>
+                      </motion.div>
                     );
                   })}
-                </motion.ul>
+                </div>
               </motion.div>
             </AnimatePresence>
           </div>
