@@ -102,7 +102,7 @@ async function main() {
   await prisma.heroStat.deleteMany({ where: { heroId: "main" } });
   await prisma.heroStat.createMany({
     data: [
-      { heroId: "main", label: "Projects built", value: "4+", order: 0 },
+      { heroId: "main", label: "Projects built", value: "6", order: 0 },
       { heroId: "main", label: "Programming languages", value: "6", order: 1 },
       { heroId: "main", label: "Certificates earned", value: "4", order: 2 },
     ],
@@ -133,7 +133,7 @@ async function main() {
   await prisma.aboutStat.deleteMany({ where: { aboutId: "main" } });
   await prisma.aboutStat.createMany({
     data: [
-      { aboutId: "main", label: "Projects built", value: "4+", order: 0 },
+      { aboutId: "main", label: "Projects built", value: "6", order: 0 },
       { aboutId: "main", label: "Programming languages", value: "6", order: 1 },
       { aboutId: "main", label: "Certificates earned", value: "4", order: 2 },
       { aboutId: "main", label: "Degrees & diplomas", value: "3", order: 3 },
