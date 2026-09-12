@@ -199,8 +199,10 @@ async function main() {
     await prisma.skill.deleteMany({ where: { categoryId: record.id } });
     if (cat.skills.length > 0) {
       await prisma.skill.createMany({
-        data: cat.skills.map((name, i) => ({
-          name,
+        data: cat.skills.map((skill, i) => ({
+          name: skill.name,
+          level: skill.level,
+          highlight: skill.highlight ?? false,
           categoryId: record.id,
           order: i,
           visible: true,
