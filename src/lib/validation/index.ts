@@ -12,8 +12,10 @@ export const optionalString = (max = 10000) =>
     .optional()
     .transform((v) => (v ? v : undefined));
 
+// Accepts a full URL or a local absolute path (e.g. /achievements/award.jpg,
+// as used by seeded media). Empty string is treated as "no value".
 export const optionalUrl = z
-  .union([z.literal(""), z.string().url()])
+  .union([z.literal(""), z.string().url(), z.string().startsWith("/")])
   .optional()
   .transform((v) => (v ? v : undefined));
 
