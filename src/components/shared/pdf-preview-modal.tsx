@@ -10,6 +10,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { PdfMobileViewer } from "@/components/shared/pdf-mobile-viewer";
 import { cn } from "@/lib/utils";
 
 export function PdfPreviewModal({
@@ -27,6 +29,7 @@ export function PdfPreviewModal({
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
   const objectUrlRef = useRef<string | null>(null);
+  const isMobile = useMediaQuery("(max-width: 767.98px)");
 
   if (!href) return null;
 
@@ -70,11 +73,21 @@ export function PdfPreviewModal({
           <DialogTitle>{label}</DialogTitle>
         </DialogHeader>
         <div className="overflow-hidden rounded-md border border-border bg-card">
-          <iframe
-            src={src ?? "about:blank"}
-            title={`${label} preview`}
-            className="h-[70vh] w-full"
-          />
+          {isMobile ? (
+            src ? (
+              <PdfMobileViewer src={src} label={label} />
+            ) : (
+              <div className="flex h-[70vh] items-center justify-center text-sm text-muted-foreground">
+                Loading preview…
+              </div>
+            )
+          ) : (
+            <iframe
+              src={src ?? "about:blank"}
+              title={`${label} preview`}
+              className="h-[70vh] w-full"
+            />
+          )}
         </div>
         {failed ? (
           <p className="text-sm text-destructive">
