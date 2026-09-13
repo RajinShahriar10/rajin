@@ -83,6 +83,7 @@ export const aboutSchema = z.object({
   imageUrl: optionalUrl,
   imageAlt: optionalString(200),
   resumeUrl: optionalUrl,
+  cvUrl: optionalUrl,
   stats: z.array(z.object({ id: optionalString(), label: z.string().trim().min(1), value: z.string().trim().min(1), order: z.number().int().default(0) })).default([]),
   principles: z.array(z.object({ id: optionalString(), title: z.string().trim().min(1).max(120), summary: z.string().trim().min(1).max(500), order: z.number().int().default(0) })).default([]),
 });

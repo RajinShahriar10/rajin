@@ -31,6 +31,7 @@ export function AboutForm({
     imageUrl: string | null;
     imageAlt: string | null;
     resumeUrl: string | null;
+    cvUrl: string | null;
     stats: Array<{ id: string; label: string; value: string; order: number }>;
     principles: Array<{
       id: string;
@@ -51,6 +52,7 @@ export function AboutForm({
       imageUrl: about?.imageUrl ?? "",
       imageAlt: about?.imageAlt ?? "",
       resumeUrl: about?.resumeUrl ?? "",
+      cvUrl: about?.cvUrl ?? "",
       stats: about?.stats ?? [],
       principles: about?.principles ?? [],
     },
@@ -85,6 +87,7 @@ export function AboutForm({
             <MediaField control={form.control} name="imageUrl" label="Image" />
             <TextField control={form.control} name="imageAlt" label="Image alt text" />
             <MediaField control={form.control} name="resumeUrl" label="Resume file" />
+            <MediaField control={form.control} name="cvUrl" label="CV file" />
           </div>
         </div>
 

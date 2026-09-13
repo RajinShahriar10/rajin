@@ -101,7 +101,7 @@ export function MediaManager({ initial }: { initial: MediaItem[] }) {
         <input
           ref={fileRef}
           type="file"
-          accept="image/*,video/*"
+          accept="image/*,video/*,application/pdf"
           multiple
           className="hidden"
           onChange={(e) => {

@@ -7,6 +7,7 @@ import { Markdown } from "@/components/shared/markdown";
 import { CloudinaryImage } from "@/components/shared/cloudinary-image";
 import { Parallax } from "@/components/shared/parallax";
 import { AnimatedNumber } from "@/components/shared/animated-number";
+import { PdfPreviewModal } from "@/components/shared/pdf-preview-modal";
 import { parseStat } from "@/lib/stats";
 
 type AboutPreviewData = {
@@ -14,6 +15,8 @@ type AboutPreviewData = {
   content?: string | null;
   imageUrl?: string | null;
   imageAlt?: string | null;
+  resumeUrl?: string | null;
+  cvUrl?: string | null;
   stats?: Array<{ id: string; label: string; value: string }>;
 };
 
@@ -93,6 +96,14 @@ export function AboutPreview({
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </Reveal>
+          {about.resumeUrl || about.cvUrl ? (
+            <Reveal delay={0.2} className="mt-6">
+              <div className="flex flex-col gap-3 sm:max-w-sm sm:flex-row">
+                <PdfPreviewModal label="Resume" href={about.resumeUrl} />
+                <PdfPreviewModal label="CV" href={about.cvUrl} />
+              </div>
+            </Reveal>
+          ) : null}
         </div>
       </div>
     </section>

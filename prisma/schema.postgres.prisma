@@ -87,6 +87,8 @@ model About {
   imageAlt        String?
   resumeUrl       String?
   resumePublicId  String?
+  cvUrl           String?
+  cvPublicId      String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

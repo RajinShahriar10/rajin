@@ -1,4 +1,3 @@
-import { ArrowUpRight, FileText } from "lucide-react";
 import { getSiteData } from "@/lib/data/site";
 import { getSkills } from "@/lib/data/content";
 import { buildMetadata } from "@/lib/metadata";
@@ -8,7 +7,7 @@ import { Reveal } from "@/components/shared/reveal";
 import { Markdown } from "@/components/shared/markdown";
 import { StatsGrid } from "@/components/shared/stats-grid";
 import { SkillsSection } from "@/components/public/home/skills-section";
-import { Button } from "@/components/ui/button";
+import { PdfPreviewModal } from "@/components/shared/pdf-preview-modal";
 
 export async function generateMetadata() {
   return buildMetadata({ title: "About", path: "/about" });
@@ -55,14 +54,11 @@ export default async function AboutPage() {
               )}
             </div>
 
-            {profile?.resumeUrl ? (
-              <Button asChild className="mt-6 w-full">
-                <a href={profile.resumeUrl} target="_blank" rel="noopener noreferrer">
-                  <FileText className="h-4 w-4" />
-                  Download resume
-                  <ArrowUpRight />
-                </a>
-              </Button>
+            {(about?.resumeUrl || profile?.resumeUrl || about?.cvUrl) ? (
+              <div className="mt-6 flex flex-col gap-3">
+                <PdfPreviewModal label="Resume" href={about?.resumeUrl ?? profile?.resumeUrl} />
+                <PdfPreviewModal label="CV" href={about?.cvUrl} />
+              </div>
             ) : null}
 
             {stats.length > 0 ? <StatsGrid stats={stats} className="mt-6" /> : null}

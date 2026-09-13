@@ -209,7 +209,7 @@ export function MediaPicker({
         <input
           ref={fileRef}
           type="file"
-          accept="image/*,video/*"
+          accept="image/*,video/*,application/pdf"
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
