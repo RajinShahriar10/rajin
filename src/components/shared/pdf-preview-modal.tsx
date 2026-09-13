@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { Download, FileText, ExternalLink } from "lucide-react";
 import {
   Dialog,
@@ -22,14 +23,42 @@ export function PdfPreviewModal({
   variant?: "default" | "outline" | "ghost" | "secondary" | "link" | "destructive";
   className?: string;
 }) {
+  const [src, setSrc] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const objectUrlRef = useRef<string | null>(null);
+
   if (!href) return null;
 
   const encoded = encodeURIComponent(href);
   const previewSrc = `/api/documents?url=${encoded}`;
   const downloadHref = `/api/documents?url=${encoded}&download=1`;
 
+  async function loadPreview() {
+    if (loading) return;
+    setLoading(true);
+    setFailed(false);
+    try {
+      const res = await fetch(previewSrc);
+      if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+      const blob = await res.blob();
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+      const objectUrl = URL.createObjectURL(blob);
+      objectUrlRef.current = objectUrl;
+      setSrc(objectUrl);
+    } catch {
+      setFailed(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <Dialog>
+    <Dialog
+      onOpenChange={(open) => {
+        if (open) void loadPreview();
+      }}
+    >
       <DialogTrigger asChild>
         <Button type="button" variant={variant} className={cn("w-full", className)}>
           <FileText className="h-4 w-4" />
@@ -42,11 +71,17 @@ export function PdfPreviewModal({
         </DialogHeader>
         <div className="overflow-hidden rounded-md border border-border bg-card">
           <iframe
-            src={previewSrc}
+            src={src ?? "about:blank"}
             title={`${label} preview`}
             className="h-[70vh] w-full"
           />
         </div>
+        {failed ? (
+          <p className="text-sm text-destructive">
+            The file could not be loaded for preview. Use open in a new tab or download instead.
+          </p>
+        ) : null}
+        {loading ? <p className="text-sm text-muted-foreground">Loading preview…</p> : null}
         <div className="flex items-center justify-end gap-3">
           <Button asChild variant="outline">
             <a href={previewSrc} target="_blank" rel="noopener noreferrer">
