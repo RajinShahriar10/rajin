@@ -273,6 +273,19 @@ body {
   color: var(--muted-foreground);
 }
 
+/* Gradient text used for accent words in the hero headline. */
+.text-gradient-brand {
+  background-image: linear-gradient(
+    90deg,
+    var(--primary) 0%,
+    color-mix(in srgb, var(--primary) 55%, #7dd3fc) 50%,
+    var(--foreground) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
 /* ===========================================================================
    Layout helpers
    =========================================================================== */

@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { AnimatedHeadline } from "@/components/public/home/animated-headline";
 import { HeroBackground } from "@/components/public/three/hero-background";
 import { HeroVisual } from "@/components/public/home/hero-visual";
+import { TechLogoField } from "@/components/public/home/tech-logo-field";
 import { Magnetic } from "@/components/shared/magnetic";
 import { Button } from "@/components/ui/button";
 import { AnimatedNumber } from "@/components/shared/animated-number";
@@ -50,6 +51,15 @@ export function HeroSection({ hero }: HeroProps) {
       <div aria-hidden="true" className="hidden lg:block">
         <HeroBackground variant={hero.background} />
       </div>
+
+      {/* faint engineering grid, faded toward the edges */}
+      <div
+        aria-hidden="true"
+        className="bg-grid pointer-events-none absolute inset-0 opacity-40 [mask-image:radial-gradient(ellipse_85%_75%_at_50%_40%,black,transparent_75%)]"
+      />
+
+      {/* floating programming-language logos */}
+      <TechLogoField />
 
       {/* editorial glow, kept subtle so the text stays readable */}
       <div

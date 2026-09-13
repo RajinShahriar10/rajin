@@ -9,6 +9,7 @@ import {
   type MotionValue,
 } from "motion/react";
 import { Terminal } from "lucide-react";
+import { SiDotnet, SiReact } from "react-icons/si";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { CloudinaryImage } from "@/components/shared/cloudinary-image";
 import { cn } from "@/lib/utils";
@@ -16,9 +17,26 @@ import { DURATION, EASE } from "@/lib/motion";
 
 const CHIPS = [
   { code: 'var stack = new[] { "C#", ".NET" };', className: "-left-10 top-8", depth: 1.5, duration: 6 },
-  { code: "await DeployToNetlifyAsync();", className: "-right-8 top-1/3", depth: 1.9, duration: 7 },
   { code: 'SELECT TOP 4 * FROM Projects', className: "-left-12 bottom-1/4", depth: 1.2, duration: 5 },
-  { code: 'public class Portfolio { }', className: "right-6 -bottom-6", depth: 1.7, duration: 6.5 },
+];
+
+const BADGES = [
+  {
+    Icon: SiReact,
+    name: "React",
+    color: "#61DAFB",
+    className: "-right-6 top-1/3",
+    depth: 2.1,
+    duration: 6.5,
+  },
+  {
+    Icon: SiDotnet,
+    name: ".NET",
+    color: "#9d79f2",
+    className: "right-8 -bottom-6",
+    depth: 1.6,
+    duration: 7.5,
+  },
 ];
 
 function Chip({
@@ -57,6 +75,51 @@ function Chip({
             {code}
           </div>
           <span className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-primary/70" />
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function Badge({
+  Icon,
+  name,
+  color,
+  depth,
+  duration,
+  className,
+  sx,
+  sy,
+}: {
+  Icon: typeof SiReact;
+  name: string;
+  color: string;
+  depth: number;
+  duration: number;
+  className?: string;
+  sx: MotionValue<number>;
+  sy: MotionValue<number>;
+}) {
+  const prefersReducedMotion = useReducedMotion();
+  const x = useTransform(sx, (v) => v * 110 * depth);
+  const y = useTransform(sy, (v) => v * 110 * depth);
+
+  return (
+    <motion.div
+      className={cn("pointer-events-none absolute z-20 hidden lg:block", className)}
+      style={{ x, y }}
+      initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: DURATION.base, delay: 1.1, ease: EASE.outExpo }}
+    >
+      <motion.div
+        animate={prefersReducedMotion ? undefined : { y: [0, -9, 0] }}
+        transition={{ duration, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <div className="relative flex h-12 w-12 items-center justify-center rounded-xl border border-border/70 bg-background/80 shadow-lg shadow-black/25 backdrop-blur">
+          <Icon style={{ color }} size={20} aria-hidden="true" />
+          <span className="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-full border-2 border-background bg-primary/80" />
+          <span className="sr-only">{name}</span>
         </div>
       </motion.div>
     </motion.div>
@@ -179,6 +242,16 @@ export function HeroVisual({ imageUrl, imageAlt }: HeroVisualProps) {
           sx={sx}
           sy={sy}
         />
+        <Badge
+          Icon={BADGES[0].Icon}
+          name={BADGES[0].name}
+          color={BADGES[0].color}
+          depth={BADGES[0].depth}
+          duration={BADGES[0].duration}
+          className={BADGES[0].className}
+          sx={sx}
+          sy={sy}
+        />
         <Chip
           code={CHIPS[1].code}
           depth={CHIPS[1].depth}
@@ -187,19 +260,13 @@ export function HeroVisual({ imageUrl, imageAlt }: HeroVisualProps) {
           sx={sx}
           sy={sy}
         />
-        <Chip
-          code={CHIPS[2].code}
-          depth={CHIPS[2].depth}
-          duration={CHIPS[2].duration}
-          className={CHIPS[2].className}
-          sx={sx}
-          sy={sy}
-        />
-        <Chip
-          code={CHIPS[3].code}
-          depth={CHIPS[3].depth}
-          duration={CHIPS[3].duration}
-          className={CHIPS[3].className}
+        <Badge
+          Icon={BADGES[1].Icon}
+          name={BADGES[1].name}
+          color={BADGES[1].color}
+          depth={BADGES[1].depth}
+          duration={BADGES[1].duration}
+          className={BADGES[1].className}
           sx={sx}
           sy={sy}
         />

@@ -44,7 +44,7 @@ export function AnimatedHeadline({
             <motion.span
               className={cn(
                 "inline-block will-change-transform",
-                isAccent && "text-primary",
+                isAccent && "text-gradient-brand",
               )}
               variants={{
                 hidden: {
