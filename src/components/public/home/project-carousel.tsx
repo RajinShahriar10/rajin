@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, useMotionValue, useSpring } from "motion/react";
+import { motion, useMotionValue, useMotionValueEvent, useSpring } from "motion/react";
 import { ProjectCard, type ProjectCardData } from "@/components/public/projects/project-card";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
@@ -10,11 +10,14 @@ import { cn } from "@/lib/utils";
 const GAP = 24;
 const CARD_FRACTION = 0.82;
 const CARD_MAX = 416;
+const AUTOPLAY_MS = 2400;
 
 /**
  * Centered project carousel: one card at a time, paged 1-by-1 with the
  * prev/next buttons (or swipe on touch). The active card sits in the middle and
- * neighbours stay visible but dimmed. Auto-advances every 2s, looping.
+ * neighbours stay visible but dimmed. Auto-advances while untouched and pauses
+ * the moment the user hovers, presses or drags — the card they move toward
+ * lights up as the focused card.
  */
 export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
   const prefersReducedMotion = useReducedMotion();
@@ -22,6 +25,10 @@ export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
   const [cardW, setCardW] = useState(0);
   const [offset, setOffset] = useState(0);
   const [index, setIndex] = useState(0);
+  const [liveIndex, setLiveIndex] = useState(0);
+  const [hovering, setHovering] = useState(false);
+  const [pressed, setPressed] = useState(false);
+  const [dragging, setDragging] = useState(false);
 
   const count = projects.length;
   const step = cardW + GAP;
@@ -47,13 +54,16 @@ export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
     return () => observer.disconnect();
   }, []);
 
+  const clamp = useCallback((value: number) => Math.max(0, Math.min(maxIndex, value)), [maxIndex]);
+
   const goTo = useCallback(
     (target: number) => {
-      const next = Math.max(0, Math.min(maxIndex, target));
+      const next = clamp(target);
       setIndex(next);
+      setLiveIndex(next);
       x.set(offset - next * step);
     },
-    [maxIndex, step, offset, x],
+    [clamp, step, offset, x],
   );
 
   // Re-center when the viewport or page index changes.
@@ -61,24 +71,69 @@ export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
     x.set(offset - index * step);
   }, [offset, index, step, x]);
 
-  // Auto-advance the carousel every 2s, looping back to the start. The timer
-  // restarts on every index change, so manual paging or a drag countdown
-  // continues from the new position.
+  // While the user holds or drags, live-update the focused card so the one
+  // they are moving towards stays bright instead of dimming under their finger.
+  useMotionValueEvent(x, "change", (latest) => {
+    if (!pressed && !dragging) return;
+    if (step <= 0) return;
+    const next = clamp(Math.round((offset - latest) / step));
+    setLiveIndex((prev) => (prev === next ? prev : next));
+  });
+
+  const paused = hovering || pressed || dragging;
+
+  // Auto-advance only while untouched; the timer restarts after every
+  // interaction or index change for a full, calm countdown.
   useEffect(() => {
-    if (prefersReducedMotion || count <= 1) return;
+    if (prefersReducedMotion || count <= 1 || paused) return;
     const id = setInterval(() => {
       goTo(index >= count - 1 ? 0 : index + 1);
-    }, 2000);
+    }, AUTOPLAY_MS);
     return () => clearInterval(id);
-  }, [prefersReducedMotion, count, index, goTo]);
+  }, [prefersReducedMotion, count, index, paused, goTo]);
+
+  const focusAtPointer = useCallback(() => {
+    if (step <= 0) return;
+    setLiveIndex(clamp(Math.round((offset - x.get()) / step)));
+  }, [step, clamp, offset, x]);
+
+  const handlePointerDown = useCallback(
+    (event: ReactPointerEvent) => {
+      if (event.pointerType === "mouse") setHovering(true);
+      setPressed(true);
+      focusAtPointer();
+    },
+    [focusAtPointer],
+  );
+
+  const handlePointerUp = useCallback(() => {
+    setPressed(false);
+    if (!dragging && liveIndex !== index) goTo(liveIndex);
+  }, [dragging, liveIndex, index, goTo]);
+
+  const handlePointerCancel = useCallback(() => setPressed(false), []);
+
+  const handlePointerEnter = useCallback((event: ReactPointerEvent) => {
+    if (event.pointerType === "mouse") setHovering(true);
+  }, []);
+
+  const handlePointerLeave = useCallback((event: ReactPointerEvent) => {
+    if (event.pointerType === "mouse") setHovering(false);
+  }, []);
+
+  const onDragStart = useCallback(() => {
+    setDragging(true);
+    focusAtPointer();
+  }, [focusAtPointer]);
 
   const onDragEnd = useCallback(
     (_: unknown, info: { offset: { x: number }; velocity: { x: number } }) => {
+      setPressed(false);
+      setDragging(false);
       if (step <= 0) return;
       let projected = -x.get() + offset - info.offset.x;
       if (Math.abs(info.velocity.x) > 500) projected -= info.velocity.x * 0.15;
-      const next = Math.round(projected / step);
-      goTo(next);
+      goTo(Math.round(projected / step));
     },
     [goTo, step, offset, x],
   );
@@ -90,10 +145,15 @@ export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
     <div>
       <div
         ref={viewportRef}
-        className="relative overflow-hidden"
+        className="relative overflow-hidden select-none"
         role="region"
         aria-roledescription="carousel"
         aria-label="Featured projects"
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
       >
         <motion.div
           className={cn(
@@ -106,12 +166,13 @@ export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
           drag={draggable ? "x" : false}
           dragConstraints={{ left: offset - maxIndex * step, right: offset }}
           dragElastic={0.1}
+          onDragStart={onDragStart}
           onDragEnd={onDragEnd}
         >
           {projects.map((project, i) => {
-            const dist = Math.abs(i - index);
-            const scale = dist === 0 ? 1 : 0.92;
-            const opacity = dist === 0 ? 1 : Math.max(1 - dist * 0.35, 0.15);
+            const dist = Math.abs(i - liveIndex);
+            const scale = dist === 0 ? 1 : 0.94;
+            const opacity = dist === 0 ? 1 : Math.max(1 - dist * 0.3, 0.18);
             return (
               <motion.div
                 key={project.id}
@@ -120,7 +181,9 @@ export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
                 className={cn("shrink-0", i > 0 && "ml-6")}
                 animate={{ scale, opacity }}
                 transition={
-                  prefersReducedMotion ? { duration: 0 } : { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+                  prefersReducedMotion
+                    ? { duration: 0 }
+                    : { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
                 }
               >
                 <ProjectCard project={project} index={i} imageFit="contain" />

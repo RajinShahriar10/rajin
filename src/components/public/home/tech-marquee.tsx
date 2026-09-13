@@ -1,12 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
 /**
  * Technical identity band: two counter-scrolling rows of large display type
- * separated by glyphs. Pauses on hover; reduces to static rows under motion
- * preferences.
+ * separated by glyphs. Pauses on hover and while touched; reduces to static
+ * rows under motion preferences.
  */
 function MarqueeRow({
   items,
@@ -18,11 +19,15 @@ function MarqueeRow({
   className?: string;
 }) {
   const prefersReducedMotion = useReducedMotion();
+  const [touching, setTouching] = useState(false);
   const row = [...items, ...items];
   const padded = row.length === 0 ? [] : row;
 
   return (
     <div
+      onPointerDown={() => setTouching(true)}
+      onPointerUp={() => setTouching(false)}
+      onPointerCancel={() => setTouching(false)}
       className={cn(
         "flex w-max items-center gap-12 whitespace-nowrap py-1",
         reverse
@@ -31,7 +36,13 @@ function MarqueeRow({
         "hover:[animation-play-state:paused]",
         className,
       )}
-      style={prefersReducedMotion ? { animation: "none" } : undefined}
+      style={
+        prefersReducedMotion
+          ? { animation: "none" }
+          : touching
+            ? { animationPlayState: "paused" }
+            : undefined
+      }
     >
       {padded.map((item, i) => (
         <span
