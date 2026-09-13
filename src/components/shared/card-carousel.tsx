@@ -10,7 +10,13 @@ import {
   type ReactNode,
 } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, useMotionValue, useMotionValueEvent, useSpring } from "motion/react";
+import {
+  motion,
+  useInView,
+  useMotionValue,
+  useMotionValueEvent,
+  useSpring,
+} from "motion/react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
@@ -30,9 +36,10 @@ type CardCarouselProps = {
 /**
  * Centered card carousel: one card at a time, paged 1-by-1 with the prev/next
  * buttons (or swipe on touch). The active card sits centered; neighbours stay
- * visible but dimmed. Auto-advances while untouched and pauses the moment the
- * user hovers, presses or drags — the card they move toward lights up as the
- * focused card. Pauses for users who prefer reduced motion.
+ * visible but dimmed. Auto-advances smoothly while the section is on screen
+ * (the countdown restarts in full every time it scrolls into view) and pauses
+ * the moment the user hovers, presses or drags. Pauses for users who prefer
+ * reduced motion.
  */
 export function CardCarousel({
   children,
@@ -50,6 +57,7 @@ export function CardCarousel({
   const [hovering, setHovering] = useState(false);
   const [pressed, setPressed] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const viewportInView = useInView(viewportRef, { amount: 0.2 });
 
   const items = Children.toArray(children);
   const count = items.length;
@@ -102,17 +110,21 @@ export function CardCarousel({
     setLiveIndex((prev) => (prev === next ? prev : next));
   });
 
-  const paused = hovering || pressed || dragging;
-
-  // Auto-advance only while untouched; the timer restarts after every
-  // interaction or index change for a full, calm countdown.
   useEffect(() => {
-    if (prefersReducedMotion || count <= 1 || paused) return;
+    if (
+      prefersReducedMotion ||
+      count <= 1 ||
+      !viewportInView ||
+      hovering ||
+      pressed ||
+      dragging
+    )
+      return;
     const id = setInterval(() => {
       goTo(index >= count - 1 ? 0 : index + 1);
     }, AUTOPLAY_MS);
     return () => clearInterval(id);
-  }, [prefersReducedMotion, count, index, paused, goTo]);
+  }, [prefersReducedMotion, count, viewportInView, index, hovering, pressed, dragging, goTo]);
 
   const focusAtPointer = useCallback(() => {
     if (step <= 0) return;

@@ -39,7 +39,7 @@ export function CertificatesSection({
           description="Certifications and credentials I have earned."
         />
 
-        <div className="mt-14">
+        <Reveal className="mt-14">
           <CardCarousel
             label="Certificates"
             previousLabel="Previous certificate"
@@ -49,7 +49,7 @@ export function CertificatesSection({
               <CertificateCard key={cert.id} certificate={cert} />
             ))}
           </CardCarousel>
-        </div>
+        </Reveal>
 
         <div className="mt-10 text-center">
           <Link

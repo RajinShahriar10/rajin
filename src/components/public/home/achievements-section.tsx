@@ -6,6 +6,7 @@ import {
   AchievementCard,
   type AchievementCardData,
 } from "@/components/public/achievements/achievement-card";
+import { Reveal } from "@/components/shared/reveal";
 
 export function AchievementsSection({
   achievements,
@@ -24,7 +25,7 @@ export function AchievementsSection({
           align="center"
         />
 
-        <div className="mt-14">
+        <Reveal className="mt-14">
           <CardCarousel
             label="Achievements"
             previousLabel="Previous award"
@@ -34,7 +35,7 @@ export function AchievementsSection({
               <AchievementCard key={item.id} achievement={item} />
             ))}
           </CardCarousel>
-        </div>
+        </Reveal>
 
         <div className="mt-12 text-center">
           <Link

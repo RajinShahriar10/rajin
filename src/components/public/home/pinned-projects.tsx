@@ -1,5 +1,6 @@
 import { ProjectCarousel } from "@/components/public/home/project-carousel";
 import type { ProjectCardData } from "@/components/public/projects/project-card";
+import { Reveal } from "@/components/shared/reveal";
 
 type PinnedProjectsProps = {
   projects: ProjectCardData[];
@@ -10,5 +11,9 @@ type PinnedProjectsProps = {
  * a time, paged 1-by-1 with the prev/next buttons.
  */
 export function PinnedProjects({ projects }: PinnedProjectsProps) {
-  return <ProjectCarousel projects={projects} />;
+  return (
+    <Reveal>
+      <ProjectCarousel projects={projects} />
+    </Reveal>
+  );
 }

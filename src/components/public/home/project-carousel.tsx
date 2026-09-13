@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, useMotionValue, useMotionValueEvent, useSpring } from "motion/react";
+import { motion, useInView, useMotionValue, useMotionValueEvent, useSpring } from "motion/react";
 import { ProjectCard, type ProjectCardData } from "@/components/public/projects/project-card";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ const AUTOPLAY_MS = 2400;
 export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
   const prefersReducedMotion = useReducedMotion();
   const viewportRef = useRef<HTMLDivElement>(null);
+  const viewportInView = useInView(viewportRef, { amount: 0.15 });
   const [cardW, setCardW] = useState(0);
   const [offset, setOffset] = useState(0);
   const [index, setIndex] = useState(0);
@@ -82,15 +83,17 @@ export function ProjectCarousel({ projects }: { projects: ProjectCardData[] }) {
 
   const paused = hovering || pressed || dragging;
 
-  // Auto-advance only while untouched; the timer restarts after every
-  // interaction or index change for a full, calm countdown.
+  // Auto-advance only while the section is actually on screen; once it scrolls
+  // out of view the loop freezes so the countdown restarts in full, calmly, the
+  // next time it comes back, and stays paused during any interaction or index
+  // change for a complete, unhurried countdown.
   useEffect(() => {
-    if (prefersReducedMotion || count <= 1 || paused) return;
+    if (prefersReducedMotion || count <= 1 || !viewportInView || paused) return;
     const id = setInterval(() => {
       goTo(index >= count - 1 ? 0 : index + 1);
     }, AUTOPLAY_MS);
     return () => clearInterval(id);
-  }, [prefersReducedMotion, count, index, paused, goTo]);
+  }, [prefersReducedMotion, count, viewportInView, index, paused, goTo]);
 
   const focusAtPointer = useCallback(() => {
     if (step <= 0) return;
