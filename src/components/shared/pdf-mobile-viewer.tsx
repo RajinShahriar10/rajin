@@ -20,10 +20,17 @@ export function PdfMobileViewer({ src, label }: { src: string; label: string }) 
     (async () => {
       try {
         const pdfjs = await import("pdfjs-dist");
-        pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+        let workerUrl = new URL(
           "pdfjs-dist/build/pdf.worker.min.mjs",
           import.meta.url,
         ).toString();
+        try {
+          const probe = await fetch(workerUrl, { method: "HEAD" });
+          if (!probe.ok) throw new Error("Worker not reachable");
+        } catch {
+          workerUrl = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+        }
+        pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
         const doc = await pdfjs.getDocument(src).promise;
         if (cancelled) return;
 
