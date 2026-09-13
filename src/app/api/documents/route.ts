@@ -145,6 +145,29 @@ export async function GET(request: Request) {
       }
     }
   }
+  if (searchParams.get("probe") === "1") {
+    const variants: Record<string, string> = {
+      original: url,
+      forceFormat: url.replace(/\/upload\//, "/upload/f_pdf/"),
+      resized: url.replace(/\/upload\//, "/upload/w_200/"),
+      page1: url.replace(/\/upload\//, "/upload/pg_1/"),
+      rawPath: url.replace(/\/image\/upload\//, "/raw/upload/"),
+      noVersion: url.replace(/\/v\d+\//, "/"),
+    };
+    const statuses: Record<string, number> = {};
+    for (const [key, candidate] of Object.entries(variants)) {
+      try {
+        const res = await fetch(candidate, { cache: "no-store" });
+        statuses[key] = res.status;
+      } catch {
+        statuses[key] = -1;
+      }
+    }
+    return new Response(JSON.stringify(statuses), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   if (searchParams.get("debug") === "1") {
     let resource: unknown = null;
     let image: unknown = null;
