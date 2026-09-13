@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join, normalize, posix } from "node:path";
 import { brotliDecompressSync, gunzipSync, inflateSync } from "node:zlib";
+import { prisma } from "@/lib/prisma";
 import { getCloudinaryPublicId } from "@/lib/cloudinary-url";
 import { cloudinary, cloudinaryConfigured } from "@/lib/cloudinary";
 
@@ -9,18 +10,13 @@ export const dynamic = "force-dynamic";
 const PDF_MIME = "application/pdf";
 
 /**
- * Public document proxy.
+ * Public document proxy. Resume/CV PDFs are stored in the database
+ * (`blob:resume` / `blob:cv` tokens) so delivery never depends on a third
+ * party. For legacy Cloudinary URLs the file is fetched server-side and
+ * rebroadcast with the correct headers, with a signed-URL fallback.
  *
- * Cloudinary can refuse direct browser delivery of PDFs (401 on iframe
- * `<embed>` navigation and on `fl_attachment` links depending on the account's
- * delivery restrictions). This route fetches the document from the server and
- * rebroadcasts it with the correct headers, so the preview and the download
- * behave exactly like Google Drive regardless of Cloudinary's policy. If the
- * plain delivery URL is rejected, a signed Cloudinary URL is generated and
- * retried.
- *
- * SSRF-safe: only Cloudinary URLs for this account's cloud name, or
- * site-relative paths under /public, are accepted.
+ * SSRF-safe: only `blob:` tokens, Cloudinary URLs for this account's cloud
+ * name, or site-relative paths under /public are accepted.
  */
 function toCleanUrl(url: string): string {
   try {
@@ -92,6 +88,28 @@ export async function GET(request: Request) {
   }
 
   const url = toCleanUrl(rawUrl);
+
+  if (url === "blob:resume" || url === "blob:cv") {
+    const isResume = url === "blob:resume";
+    const about = await prisma.about.findUnique({ where: { id: "main" } });
+    const content = isResume ? about?.resumeBlob : about?.cvBlob;
+    if (!content) {
+      return new Response("Document not found", { status: 404 });
+    }
+    const filename = isResume ? about?.resumePublicId : about?.cvPublicId;
+    const disposition = download ? "attachment" : "inline";
+    return new Response(new Uint8Array(content), {
+      headers: {
+        "Content-Type": PDF_MIME,
+        "Content-Disposition": `${disposition}; filename="${
+          filename || (isResume ? "Resume.pdf" : "CV.pdf")
+        }"`,
+        "Content-Length": String(content.byteLength),
+        "Cache-Control": "private, max-age=3600",
+      },
+    });
+  }
+
   const isCloud = allowedCloudinaryUrl(url);
   const isLocal = !isCloud && allowedLocalPath(url);
   if (!isCloud && !isLocal) {
@@ -124,94 +142,20 @@ export async function GET(request: Request) {
   }
 
   let upstream: globalThis.Response | null = null;
-  let directStatus = 0;
-  let signedStatus = 0;
-  let signedUrl: string | null = null;
   try {
     upstream = await fetch(url, { cache: "no-store" });
-    directStatus = upstream.status;
   } catch {
     upstream = null;
   }
   if (!upstream?.ok) {
-    signedUrl = signedPdfUrl(url);
-    if (signedUrl) {
+    const signed = signedPdfUrl(url);
+    if (signed) {
       try {
-        const signedRes = await fetch(signedUrl, { cache: "no-store" });
-        signedStatus = signedRes.status;
-        if (signedRes.ok) upstream = signedRes;
+        upstream = await fetch(signed, { cache: "no-store" });
       } catch {
-        signedStatus = 0;
+        upstream = null;
       }
     }
-  }
-  if (searchParams.get("probe") === "1") {
-    const variants: Record<string, string> = {
-      original: url,
-      forceFormat: url.replace(/\/upload\//, "/upload/f_pdf/"),
-      resized: url.replace(/\/upload\//, "/upload/w_200/"),
-      page1: url.replace(/\/upload\//, "/upload/pg_1/"),
-      rawPath: url.replace(/\/image\/upload\//, "/raw/upload/"),
-      noVersion: url.replace(/\/v\d+\//, "/"),
-    };
-    const statuses: Record<string, number> = {};
-    for (const [key, candidate] of Object.entries(variants)) {
-      try {
-        const res = await fetch(candidate, { cache: "no-store" });
-        statuses[key] = res.status;
-      } catch {
-        statuses[key] = -1;
-      }
-    }
-    return new Response(JSON.stringify(statuses), {
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  if (searchParams.get("debug") === "1") {
-    let resource: unknown = null;
-    let image: unknown = null;
-    const publicId = getCloudinaryPublicId(url);
-    if (cloudinaryConfigured()) {
-      const pick = (r: { resource_type?: string; type?: string; format?: string; access_mode?: string; status?: string; flags?: string[]; created_at?: string }) => ({
-        resource_type: r.resource_type,
-        type: r.type,
-        format: r.format,
-        access_mode: r.access_mode,
-        status: r.status,
-        flags: r.flags,
-        created_at: r.created_at,
-      });
-      try {
-        resource = publicId
-          ? pick(await cloudinary().api.resource(publicId, { resource_type: "image" }))
-          : null;
-      } catch (err) {
-        resource = err instanceof Error ? { error: err.message } : { error: "unknown" };
-      }
-      try {
-        image = pick(
-          await cloudinary().api.resource("rajin/thxwiwo8tq7xaspahwj1", {
-            resource_type: "image",
-          }),
-        );
-      } catch (err) {
-        image = err instanceof Error ? { error: err.message } : { error: "unknown" };
-      }
-    }
-    return new Response(
-      JSON.stringify({
-        cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? null,
-        configured: cloudinaryConfigured(),
-        directStatus,
-        signedStatus,
-        publicId,
-        contentType: upstream?.headers.get("content-type") ?? null,
-        pdf: resource,
-        png: image,
-      }),
-      { headers: { "Content-Type": "application/json" } },
-    );
   }
   if (!upstream?.ok) {
     return new Response("Unable to load document", { status: 502 });

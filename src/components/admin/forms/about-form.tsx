@@ -21,6 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PdfField } from "@/components/admin/pdf-field";
 
 export function AboutForm({
   about,
@@ -86,8 +87,30 @@ export function AboutForm({
           <div className="grid gap-5">
             <MediaField control={form.control} name="imageUrl" label="Image" />
             <TextField control={form.control} name="imageAlt" label="Image alt text" />
-            <MediaField control={form.control} name="resumeUrl" label="Resume file" />
-            <MediaField control={form.control} name="cvUrl" label="CV file" />
+            <FormField
+              control={form.control}
+              name="resumeUrl"
+              render={({ field }) => (
+                <PdfField
+                  label="Resume file"
+                  doc="resume"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cvUrl"
+              render={({ field }) => (
+                <PdfField
+                  label="CV file"
+                  doc="cv"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </div>
 

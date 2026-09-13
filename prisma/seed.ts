@@ -130,8 +130,10 @@ async function main() {
     imageAlt: null,
     resumeUrl: null,
     resumePublicId: null,
+    resumeBlob: null,
     cvUrl: null,
     cvPublicId: null,
+    cvBlob: null,
   };
 
   await prisma.about.upsert({
