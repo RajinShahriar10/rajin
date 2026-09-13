@@ -124,20 +124,40 @@ export async function GET(request: Request) {
   }
 
   let upstream: globalThis.Response | null = null;
+  let directStatus = 0;
+  let signedStatus = 0;
+  let signedUrl: string | null = null;
   try {
     upstream = await fetch(url, { cache: "no-store" });
+    directStatus = upstream.status;
   } catch {
     upstream = null;
   }
   if (!upstream?.ok) {
-    const signed = signedPdfUrl(url);
-    if (signed) {
+    signedUrl = signedPdfUrl(url);
+    if (signedUrl) {
       try {
-        upstream = await fetch(signed, { cache: "no-store" });
+        const signedRes = await fetch(signedUrl, { cache: "no-store" });
+        signedStatus = signedRes.status;
+        if (signedRes.ok) upstream = signedRes;
       } catch {
-        upstream = null;
+        signedStatus = 0;
       }
     }
+  }
+  if (searchParams.get("debug") === "1") {
+    return new Response(
+      JSON.stringify({
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? null,
+        configured: cloudinaryConfigured(),
+        directStatus,
+        signedStatus,
+        signedUrl,
+        publicId: getCloudinaryPublicId(url),
+        contentType: upstream?.headers.get("content-type") ?? null,
+      }),
+      { headers: { "Content-Type": "application/json" } },
+    );
   }
   if (!upstream?.ok) {
     return new Response("Unable to load document", { status: 502 });
