@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { getTechEntry, TechLogo } from "@/lib/tech-icons";
 import { cn } from "@/lib/utils";
 
 /**
- * Technical identity band: two counter-scrolling rows of large display type
- * separated by glyphs. Pauses on hover and while touched; reduces to static
- * rows under motion preferences.
+ * Technical identity band: two counter-scrolling rows of brand logos
+ * (with name fallbacks for unmapped skills), separated by glyphs. Pauses on
+ * hover and while touched; reduces to static rows under motion preferences.
  */
 function MarqueeRow({
   items,
@@ -44,20 +45,33 @@ function MarqueeRow({
             : undefined
       }
     >
-      {padded.map((item, i) => (
-        <span
-          key={`${item}-${i}`}
-          aria-hidden={i >= items.length}
-          className="flex items-center gap-12"
-        >
-          <span className="font-display text-2xl font-semibold tracking-tight text-foreground/80 transition-colors hover:text-primary sm:text-3xl">
-            {item}
+      {padded.map((item, i) => {
+        const hasLogo = getTechEntry(item) !== null;
+        return (
+          <span
+            key={`${item}-${i}`}
+            aria-hidden={i >= items.length}
+            className="flex items-center gap-12"
+          >
+            {hasLogo ? (
+              <span
+                className="group relative flex h-11 w-11 items-center justify-center sm:h-14 sm:w-14"
+                title={item}
+              >
+                <TechLogo name={item} size={32} className="h-8 w-8 sm:h-10 sm:w-10" />
+                <span className="sr-only">{item}</span>
+              </span>
+            ) : (
+              <span className="font-display text-2xl font-semibold tracking-tight text-foreground/80 transition-colors hover:text-primary sm:text-3xl">
+                {item}
+              </span>
+            )}
+            <span className="font-mono text-sm text-primary/60" aria-hidden>
+              {reverse ? "\\" : "/"}
+            </span>
           </span>
-          <span className="font-mono text-sm text-primary/60" aria-hidden>
-            {reverse ? "\\" : "/"}
-          </span>
-        </span>
-      ))}
+        );
+      })}
     </div>
   );
 }
