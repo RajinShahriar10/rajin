@@ -227,12 +227,22 @@ export function SiteHeader({
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <>
+            <motion.div
+              aria-hidden
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : DURATION.fast }}
+              onClick={() => setOpen(false)}
+              className="fixed inset-0 top-[var(--nav-height)] z-40 bg-black/60 backdrop-blur-sm xl:hidden"
+            />
+            <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: prefersReducedMotion ? 0 : DURATION.fast }}
-            className="fixed inset-0 top-[var(--nav-height)] z-50 bg-background/95 backdrop-blur-xl xl:hidden"
+            className="fixed inset-0 top-[var(--nav-height)] z-50 bg-background/70 backdrop-blur-xl xl:hidden"
             id="mobile-menu"
             ref={menuPanelRef}
           >
@@ -314,9 +324,10 @@ export function SiteHeader({
                 </motion.div>
               )}
             </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+            </>
+          )}
+        </AnimatePresence>
     </header>
   );
 }
