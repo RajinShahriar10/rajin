@@ -99,16 +99,6 @@ export function cloudinaryLoader(
 }
 
 /**
- * A Cloudinary delivery URL that forces the browser to download instead of
- * previewing (adds the `fl_attachment` transformation). Non-Cloudinary URLs
- * are returned untouched. The public id's base name becomes the filename.
- */
-export function cloudinaryAttachmentUrl(url: string): string {
-  if (!isCloudinaryUrl(url) || url.includes("/fl_attachment/")) return url;
-  return url.replace(/\/upload\//, `/upload/fl_attachment/`);
-}
-
-/**
  * A poster frame for Cloudinary-hosted videos.
  */
 export function cloudinaryVideoThumb(url: string, width = 480): string {

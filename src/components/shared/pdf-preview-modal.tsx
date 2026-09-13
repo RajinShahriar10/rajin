@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, ExternalLink } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { cloudinaryAttachmentUrl } from "@/lib/cloudinary-url";
 import { cn } from "@/lib/utils";
 
 export function PdfPreviewModal({
@@ -25,8 +24,9 @@ export function PdfPreviewModal({
 }) {
   if (!href) return null;
 
-  const downloadHref = cloudinaryAttachmentUrl(href);
-  const forceDownload = downloadHref !== href;
+  const encoded = encodeURIComponent(href);
+  const previewSrc = `/api/documents?url=${encoded}`;
+  const downloadHref = `/api/documents?url=${encoded}&download=1`;
 
   return (
     <Dialog>
@@ -42,19 +42,20 @@ export function PdfPreviewModal({
         </DialogHeader>
         <div className="overflow-hidden rounded-md border border-border bg-card">
           <iframe
-            src={href}
+            src={previewSrc}
             title={`${label} preview`}
             className="h-[70vh] w-full"
           />
         </div>
-        <div className="flex justify-end">
+        <div className="flex items-center justify-end gap-3">
+          <Button asChild variant="outline">
+            <a href={previewSrc} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-4 w-4" />
+              Open in new tab
+            </a>
+          </Button>
           <Button asChild>
-            <a
-              href={downloadHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              {...(forceDownload ? {} : { download: true })}
-            >
+            <a href={downloadHref} rel="noopener noreferrer">
               <Download className="h-4 w-4" />
               Download {label}
             </a>
