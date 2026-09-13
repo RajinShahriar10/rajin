@@ -146,6 +146,17 @@ export async function GET(request: Request) {
     }
   }
   if (searchParams.get("debug") === "1") {
+    let resource: unknown = null;
+    const publicId = getCloudinaryPublicId(url);
+    if (cloudinaryConfigured() && publicId) {
+      try {
+        resource = await cloudinary().api.resource(publicId, {
+          resource_type: "image",
+        });
+      } catch (err) {
+        resource = err instanceof Error ? { error: err.message } : { error: "unknown" };
+      }
+    }
     return new Response(
       JSON.stringify({
         cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? null,
@@ -153,8 +164,9 @@ export async function GET(request: Request) {
         directStatus,
         signedStatus,
         signedUrl,
-        publicId: getCloudinaryPublicId(url),
+        publicId,
         contentType: upstream?.headers.get("content-type") ?? null,
+        resource,
       }),
       { headers: { "Content-Type": "application/json" } },
     );
