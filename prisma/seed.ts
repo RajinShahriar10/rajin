@@ -37,14 +37,19 @@ async function main() {
     summary:
       "Software Engineer with experience building secure full-stack, desktop, and database-driven applications using ASP.NET Core, C#, Java, SQL Server, and modern software engineering practices.",
     bio:
-      "I am a Software Engineer with experience building secure full-stack, desktop and database-driven "
-      + "applications using ASP.NET Core, C#, Java, SQL Server and modern software engineering practices.\n\n"
+      "I am a Software Engineer with production-grade, open-source work on GitHub — six full projects "
+      + "spanning .NET, Java and modern TypeScript web apps. My core stack is C#/.NET (ASP.NET Core, EF "
+      + "Core, Windows Forms) with SQL Server, backed by Java and a strong command of the modern web: "
+      + "TypeScript, React, Next.js and Tailwind CSS.\n\n"
       + "I am currently pursuing a BSc in Computer Science & Engineering at American International "
-      + "University-Bangladesh (AIUB), now in my 7th semester. My work spans Java desktop applications, "
-      + "C# Windows Forms systems and ASP.NET Core full-stack applications, alongside responsive frontend "
-      + "work with HTML5, CSS3, JavaScript, Tailwind CSS and Bootstrap.\n\n"
-      + "I keep my fundamentals sharp — OOP, data structures, algorithms and database design — and enjoy "
-      + "the full journey from schema design and API logic to the interfaces people use.",
+      + "University-Bangladesh (AIUB). Alongside my studies I ship real projects — Learnzfy, a gamified "
+      + "e-learning platform built with Next.js and Prisma; DigitalWallet, a fintech wallet built on "
+      + "ASP.NET Core and SQL Server; and SyncSpace, an enterprise real-time collaboration suite "
+      + "combining .NET and React. I am also part of a research effort on renewable energy transition "
+      + "pathways for a low-carbon future in Bangladesh.\n\n"
+      + "Whatever the stack, I keep the fundamentals sharp — OOP, data structures & algorithms and "
+      + "database design — and I build with validation, safe data access and least-privilege at every "
+      + "layer.",
     email: "rajinshahriar.official@gmail.com",
     phone: "+880 1863-056306",
     location: "Bashundhara R/A, Dhaka, Bangladesh",
@@ -104,7 +109,7 @@ async function main() {
     data: [
       { heroId: "main", label: "Projects built", value: "6", order: 0 },
       { heroId: "main", label: "Programming languages", value: "6", order: 1 },
-      { heroId: "main", label: "Certificates earned", value: "4", order: 2 },
+      { heroId: "main", label: "Certificates earned", value: "7", order: 2 },
     ],
   });
 
@@ -112,12 +117,15 @@ async function main() {
   const aboutData = {
     heading: "About Me",
     content:
-      "I am a Software Engineer with experience building secure full-stack, desktop and database-driven "
-      + "applications using ASP.NET Core, C#, Java and SQL Server.\n\n"
-      + "I am currently studying Computer Science & Engineering at American International "
-      + "University-Bangladesh (AIUB), and I enjoy the full journey from schema design and API logic "
-      + "to the interfaces people use.",
-    focus: "ASP.NET Core, C#, Java, SQL Server",
+      "I am a Software Engineer who ships the whole journey — from database schema and API logic to "
+      + "the interfaces people use. My core stack is C#/.NET and SQL Server, alongside Java and the "
+      + "modern web (TypeScript, React, Next.js).\n\n"
+      + "On my GitHub (github.com/RajinShahriar10) I've published six full projects, including "
+      + "Learnzfy — a gamified e-learning platform — DigitalWallet, a fintech wallet built with "
+      + "ASP.NET Core, and SyncSpace, an enterprise real-time collaboration suite. I'm currently "
+      + "completing my BSc in Computer Science & Engineering at AIUB and researching renewable-energy "
+      + "pathways for a low-carbon Bangladesh.",
+    focus: "ASP.NET Core, C#, Java, SQL Server, TypeScript, React, Next.js",
     imageUrl: null,
     imageAlt: null,
     resumeUrl: null,
@@ -135,8 +143,8 @@ async function main() {
     data: [
       { aboutId: "main", label: "Projects built", value: "6", order: 0 },
       { aboutId: "main", label: "Programming languages", value: "6", order: 1 },
-      { aboutId: "main", label: "Certificates earned", value: "4", order: 2 },
-      { aboutId: "main", label: "Degrees & diplomas", value: "3", order: 3 },
+      { aboutId: "main", label: "Open-source repos", value: "20", order: 2 },
+      { aboutId: "main", label: "Certificates earned", value: "7", order: 3 },
     ],
   });
 
