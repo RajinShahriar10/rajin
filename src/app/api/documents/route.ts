@@ -147,14 +147,33 @@ export async function GET(request: Request) {
   }
   if (searchParams.get("debug") === "1") {
     let resource: unknown = null;
+    let image: unknown = null;
     const publicId = getCloudinaryPublicId(url);
-    if (cloudinaryConfigured() && publicId) {
+    if (cloudinaryConfigured()) {
+      const pick = (r: { resource_type?: string; type?: string; format?: string; access_mode?: string; status?: string; flags?: string[]; created_at?: string }) => ({
+        resource_type: r.resource_type,
+        type: r.type,
+        format: r.format,
+        access_mode: r.access_mode,
+        status: r.status,
+        flags: r.flags,
+        created_at: r.created_at,
+      });
       try {
-        resource = await cloudinary().api.resource(publicId, {
-          resource_type: "image",
-        });
+        resource = publicId
+          ? pick(await cloudinary().api.resource(publicId, { resource_type: "image" }))
+          : null;
       } catch (err) {
         resource = err instanceof Error ? { error: err.message } : { error: "unknown" };
+      }
+      try {
+        image = pick(
+          await cloudinary().api.resource("rajin/thxwiwo8tq7xaspahwj1", {
+            resource_type: "image",
+          }),
+        );
+      } catch (err) {
+        image = err instanceof Error ? { error: err.message } : { error: "unknown" };
       }
     }
     return new Response(
@@ -163,10 +182,10 @@ export async function GET(request: Request) {
         configured: cloudinaryConfigured(),
         directStatus,
         signedStatus,
-        signedUrl,
         publicId,
         contentType: upstream?.headers.get("content-type") ?? null,
-        resource,
+        pdf: resource,
+        png: image,
       }),
       { headers: { "Content-Type": "application/json" } },
     );
